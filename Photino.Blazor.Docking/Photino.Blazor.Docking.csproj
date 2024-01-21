@@ -14,7 +14,7 @@
         <PackageTags>photino;blazor;docking;dockable;dock;tiling;tile;layout;panel;panels;floating;float;window</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <RepositoryUrl>https://github.com/tryphotino/photino.Blazor</RepositoryUrl>
+        <RepositoryUrl>https://github.com/Andersen27/Photino.Blazor.Docking</RepositoryUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>docking.png</PackageIcon>
     </PropertyGroup>
