@@ -1,0 +1,83 @@
+﻿@using Photino.Blazor.Docking
+@using Photino.Blazor.Docking.Components
+@using System.Collections.ObjectModel
+@using System.Collections.Specialized
+
+@page "/"
+
+@inject DockingService DockingService
+
+<div style="height: 100%; display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px">
+    <div style="display: flex; gap: 10px">
+        <button class="btn btn-primary" @onclick="@(() => LayoutJson = DockingService.SaveLayout())">Save layout</button>
+        <button class="btn btn-primary" @onclick="@(() => DockingService.LoadLayout(LayoutJson))">Load layout</button>
+        <button class="btn btn-primary" @onclick="@(() => DockingService.ResetLayout())">Reset layout</button>
+
+        @if (AllPanels?.Any() == true)
+        {
+            <Radzen.Blazor.RadzenDropDown @bind-Value=@OpenedPanels Data=@AllPanels
+                                          TextProperty="Title" ValueProperty="Id"
+                                          Placeholder="All panels hidden" SelectedItemsText="panels"
+                                          Multiple="true" AllowClear="false" AllowSelectAll="false"
+                                          Style="width: 100%; max-width: 400px" />
+        }
+
+    </div>
+
+    @* Docking host *@
+    <DockPanelHost HostLayoutInited="OnHostLayoutInited">
+        <DefaultLayout>
+            <DockPanelSplit>
+                <DockPanelTabs CurrentTabIndex="0">
+                    <DockPanel Id="index" />
+                    <DockPanel Id="counter" />
+                    <DockPanel Id="fetchData" />
+                </DockPanelTabs>
+
+                <DockPanelSplit Orientation="SplitOrientation.Vertical" Percent="0.25">
+                    <DockPanel ComponentType="typeof(TestPage1)" />
+                    <DockPanel ComponentType="typeof(TestPage2)" />
+                </DockPanelSplit>
+            </DockPanelSplit>
+        </DefaultLayout>
+    </DockPanelHost>
+</div>
+
+@code
+{
+    private static string _layoutJson;
+    private static string LayoutJson
+    {
+        get => _layoutJson;
+        set => _layoutJson = value; // for debug
+    }
+
+    private IEnumerable<DockPanelConfig> AllPanels => DockingService.GetPanelsConfig();
+
+    private List<string> _openedPanels;
+    private List<string> OpenedPanels
+    {
+        get => _openedPanels;
+        set
+        {
+            foreach (var hiddenPanel in _openedPanels.Except(value))
+                DockingService.HidePanel(hiddenPanel);
+            foreach (var openedPanel in value.Except(_openedPanels))
+                DockingService.ShowPanel(openedPanel);
+
+            _openedPanels = value;
+        }
+    }
+
+    private void OnHostLayoutInited()
+    {
+        _openedPanels = AllPanels.Where(p => !DockingService.IsPanelHidden(p.Id)).Select(p => p.Id).ToList();
+        DockingService.DockPanelClosed += id =>
+        {
+            _openedPanels.Remove(id);
+            InvokeAsync(StateHasChanged);
+        };
+
+        InvokeAsync(StateHasChanged);
+    }
+}

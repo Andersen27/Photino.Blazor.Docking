@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+
+@inject DockingService DockingService
+
+@if (DisabledZones != DockZone.All)
+{
+    <div class="pb-dock-area-preview">
+        <div class="pb-dock-area-preview-zone" style="@DockAreaPreviewZoneStyle"></div>
+    </div>
+
+    <svg width="112" height="112" class="pb-dock-compass">
+
+        <defs>
+            <g id="dockzone">
+                <rect width="32" height="32" fill="transparent" />
+                <path d="M2 0h28q2 0 2 2v28q0 2-2 2h-28q-2 0-2-2v-28q0-2 2-2zm-1 2v28q0 1 1 1h28q1 0 1-1v-28q0-1-1-1h-28q-1 0-1 1z" />
+            </g>
+        </defs>
+
+        @if (PanelIsDetachedGhost)
+        {
+            <svg x="40" y="40">
+                <use xlink:href="#dockzone" />
+                <path d="M4 4h24v24h-24zm1 3v20h22v-20z" />
+            </svg>
+        }
+        else
+        {
+            <path d="M0 36h26l10-10v-26h40v26l10 10h26v40h-26l-10 10v26h-40v-26l-10-10h-26zm1 1v38h25.707l10.293 10.293v25.707h38v-25.707l10.293-10.293h25.707v-38h-25.707l-10.293-10.293v-25.707h-38v25.707l-10.293 10.293z" />
+
+            @if ((DisabledZones & DockZone.Center) != DockZone.Center)
+            {
+                <svg x="40" y="40">
+                    <use xlink:href="#dockzone" />
+                    <path d="M4 4h24v24h-24zm1 3v20h22v-20z" />
+                </svg>
+            }
+
+            @if ((DisabledZones & DockZone.Left) != DockZone.Left)
+            {
+                <svg x="4" y="40">
+                    <use xlink:href="#dockzone" />
+                    <path d="M4 4h12v24h-12zm1 3v20h10v-20zm16 9 5-4v8z" />
+                </svg>
+            }
+
+            @if ((DisabledZones & DockZone.Top) != DockZone.Top)
+            {
+                <svg x="40" y="4">
+                    <use xlink:href="#dockzone" />
+                    <path d="M4 4h24v12h-24zm1 3v8h22v-8zm11 14-4 5h8z" />
+                </svg>
+            }
+
+            @if ((DisabledZones & DockZone.Right) != DockZone.Right)
+            {
+                <svg x="76" y="40">
+                    <use xlink:href="#dockzone" />
+                    <path d="M16 4h12v24h-12zm1 3v20h10v-20zm-6 9-5-4v8z" />
+                </svg>
+            }
+
+            @if ((DisabledZones & DockZone.Bottom) != DockZone.Bottom)
+            {
+                <svg x="40" y="76">
+                    <use xlink:href="#dockzone" />
+                    <path d="M4 16h24v12h-24zm1 3v8h22v-8zm11-8-4-5h8z" />
+                </svg>
+            }
+        }
+    </svg>
+}
+
+@code {
+    [Parameter]
+    public DockZone DisabledZones { get; set; }
+
+    [Parameter]
+    public bool PanelIsDetachedGhost { get; set; }
+
+    private string DockAreaPreviewZoneStyle
+    {
+        get
+        {
+            var targetZone = DockingService.DockToAttach.Zone;
+            var width = targetZone switch
+            {
+                DockZone.Center => 100,
+                DockZone.Top => 100,
+                DockZone.Bottom => 100,
+                DockZone.Left => 50,
+                DockZone.Right => 50,
+                _ => 0
+            };
+            var height = targetZone switch
+            {
+                DockZone.Center => 100,
+                DockZone.Left => 100,
+                DockZone.Right => 100,
+                DockZone.Top => 50,
+                DockZone.Bottom => 50,
+                _ => 0
+            };
+            var left = targetZone is DockZone.Right or DockZone.Outside ? 50 : 0;
+            var top = targetZone is DockZone.Bottom or DockZone.Outside ? 50 : 0;
+
+            return $"width: {width}%; height: {height}%; left: {left}%; top: {top}%;" +
+                (targetZone == DockZone.Outside ? "background-color: transparent" : "");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        DockingService.DockZoneToAttachChanged += () => InvokeAsync(StateHasChanged);
+    }
+}

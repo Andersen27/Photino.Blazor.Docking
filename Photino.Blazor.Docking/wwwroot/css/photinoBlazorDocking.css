@@ -1,0 +1,130 @@
+.pb-dock-panel-container {
+    width: 100%;
+    height: 100%;
+    background-color: var(--rz-base-200);
+}
+
+.pb-dock-panel-host {
+}
+
+.pb-dock-panel-float {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border-top: 2px solid var(--rz-primary-darker);
+}
+
+    .pb-dock-panel-float > * {
+        position: absolute;
+    }
+
+.pb-dock-panel-float-mosaic {
+    background-image: radial-gradient(circle at center, var(--rz-primary-light) 1px, transparent 0), radial-gradient(circle at center, var(--rz-primary-light) 1px, transparent 0);
+    background-size: 6px 6px;
+    background-position: 2px 2px, 5px 5px;
+    height: 16px;
+    margin: 2px;
+}
+
+.pb-dock-panel-split {
+}
+
+.pb-dock-panel-tabs {
+    display: flex;
+    flex-direction: column;
+}
+
+.pb-dock-tabs {
+    display: flex;
+    flex-direction: row;
+    gap: 1px;
+}
+
+.pb-dock-panel-tab {
+    position: relative;
+    flex-grow: 1;
+}
+
+.pb-dock-panel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--rz-primary);
+}
+
+.pb-dock-panel-area {
+    position: relative;
+    flex-grow: 1;
+}
+
+    .pb-dock-panel-area > * {
+        position: absolute;
+    }
+
+.pb-dock-area-preview {
+    width: 100%;
+    height: 100%;
+}
+
+.pb-dock-area-preview-zone {
+    position: absolute;
+    opacity: 0.4;
+    background-color: var(--rz-primary);
+    transition: 0.15s;
+}
+
+.pb-dock-panel-destroy-mask {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.4;
+    background: repeating-linear-gradient( -45deg, rgb(from var(--rz-primary) r g b / 50%), rgb(from var(--rz-primary) r g b / 50%) 10px, var(--rz-primary) 10px, var(--rz-primary) 20px );
+    transition: 0.1s;
+}
+
+.pb-dock-panel-content {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.pb-dock-panel-header {
+    display: flex;
+    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 5px;
+    background-color: var(--rz-primary);
+    color: var(--rz-on-primary);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: var(--rz-button-transition);
+}
+
+.pb-dock-panel-header-dim {
+    background-color: var(--rz-primary-darker);
+}
+
+.pb-dock-panel-header p {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    margin: 0;
+    overflow: hidden;
+}
+
+.pb-dock-area-preview {
+    position: absolute;
+}
+
+.pb-dock-compass {
+    position: absolute;
+    margin: auto;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    fill: var(--rz-text-color);
+}

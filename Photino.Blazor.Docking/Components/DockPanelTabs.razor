@@ -1,0 +1,99 @@
+﻿@using Photino.Blazor.Docking.Components.Internal
+@using Photino.Blazor.Docking.LayoutScheme
+@using System.ComponentModel
+
+@inherits DockPanelContainer
+
+@inject DockingService DockingService
+
+@if (ParentComponent != null)
+{
+    ﻿<CascadingValue Name="ParentComponent" Value="this">
+        @ChildContent
+    </CascadingValue>
+}
+else
+{
+    @if (DockScheme.CurrentTab != null)
+    {
+        <div class="pb-dock-panel-container pb-dock-panel-tabs">
+
+            <CascadingValue Name="ParentContainerScheme" Value="DockScheme">
+                @if (DockScheme.OverrideHeaderView)
+                {
+                    <div class="pb-dock-tabs">
+                        @foreach (var panel in DockScheme.VisiblePanels)
+                        {
+                            <CascadingValue Name="DockScheme" Value="panel">
+                                <DockPanelHeader />
+                            </CascadingValue>
+                        }
+                    </div>
+                }
+
+                @foreach (var panel in DockScheme.VisiblePanels)
+                {
+                    <div class="pb-dock-panel-tab" style="@(DockScheme.CurrentTab != panel ? "display: none" : "")">
+                        <CascadingValue Name="DockScheme" Value="panel">
+                            <DockPanel />
+                        </CascadingValue>
+                    </div>
+                }
+            </CascadingValue>
+
+        </div>
+    }
+}
+
+@code
+{
+    internal new DockPanelTabsScheme DockScheme
+    {
+        get
+        {
+            if (base.DockScheme is not DockPanelTabsScheme tabsScheme)
+            {
+                tabsScheme = new();
+                base.DockScheme = tabsScheme;
+            }
+
+            return tabsScheme;
+        }
+        set => base.DockScheme = value;
+    }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public int CurrentTabIndex
+    {
+        get => DockScheme.CurrentTabIndex;
+        set => DockScheme.CurrentTabIndex = value;
+    }
+
+    protected override void OnDockSchemePropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(DockPanelScheme.IsHidden))
+        {
+            if (DockScheme.CurrentTab?.IsHidden ?? false)
+            {
+                var newIndex = DockScheme.Panels.FindLastIndex(DockScheme.CurrentTabIndex, p => !p.IsHidden);
+                if (newIndex == -1)
+                    newIndex = DockScheme.Panels.FindIndex(DockScheme.CurrentTabIndex, p => !p.IsHidden);
+                DockScheme.CurrentTabIndex = newIndex;
+            }
+        }
+
+        base.OnDockSchemePropertyChanged(sender, e);
+    }
+
+    internal override void AddChildPanel(DockPanelBase panel)
+    {
+        if (panel is not DockPanel dockPanel)
+            throw new Exception("DockPanelTabs can only contain DockPanel.");
+
+        DockScheme.Panels.Add(dockPanel.DockScheme);
+        DockScheme.Panels = DockScheme.Panels;
+    }
+}

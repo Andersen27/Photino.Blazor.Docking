@@ -1,0 +1,137 @@
+﻿@using Microsoft.JSInterop
+@using Photino.Blazor.Docking.Components.Internal
+@using Photino.Blazor.Docking.LayoutScheme
+@using PhotinoNET
+@using System.Drawing
+
+@inherits DockPanelContainer
+
+@inject DockingService DockingService
+@inject PhotinoBlazorApp PhotinoBlazorApp
+@inject IJSRuntime JSRuntime
+
+@if (DockingService.HostPanel is null)
+{
+    ﻿<CascadingValue Name="ParentComponent" Value="this">
+        @DefaultLayout
+    </CascadingValue>
+}
+else
+{
+    <div @ref="hostPanelContainer" class="pb-dock-panel-container pb-dock-panel-host">
+
+        <CascadingValue Name="ParentContainerScheme" Value="DockScheme">
+            <CascadingValue Name="DockScheme" Value="DockScheme.HostedPanel">
+                @switch (DockScheme.HostedPanel)
+                {
+                    case DockPanelScheme:
+                        <DockPanel />
+                        break;
+                    case DockPanelSplitScheme:
+                        <DockPanelSplit />
+                        break;
+                    case DockPanelTabsScheme:
+                        <DockPanelTabs />
+                        break;
+                }
+            </CascadingValue>
+        </CascadingValue>
+    </div>
+}
+
+@code
+{
+    private static bool _inited = false;
+    private ElementReference hostPanelContainer;
+
+    private PhotinoWindow HostWindow => PhotinoBlazorApp.MainWindow;
+    private HostWindowInfo HostWindowInfo => DockingService.HostWindow;
+
+    internal new DockPanelHostScheme DockScheme
+    {
+        get
+        {
+            if (base.DockScheme is not DockPanelHostScheme hostScheme)
+            {
+                hostScheme = new();
+                base.DockScheme = hostScheme;
+            }
+
+            return hostScheme;
+        }
+        set => base.DockScheme = value;
+    }
+
+    [Parameter]
+    public RenderFragment DefaultLayout { get; set; }
+
+    [Parameter]
+    public EventCallback HostLayoutInited { get; set; }
+
+    private void BindHostWindowInfo()
+    {
+        if (DockingService.RestoreHostWindow && HostWindowInfo != null)
+        {
+            HostWindow.Location = HostWindowInfo.Location;
+            HostWindow.Size = HostWindowInfo.Size;
+            HostWindow.Maximized = HostWindowInfo.Maximized;
+        }
+
+        HostWindow.WindowLocationChanged += (_, location) => HostWindowInfo.Location = location;
+        HostWindow.WindowSizeChanged += (_, size) => HostWindowInfo.Size = size;
+        HostWindow.WindowMaximized += (_, _) => HostWindowInfo.Maximized = HostWindow.Maximized;
+    }
+
+    protected override void OnInitialized()
+    {
+        if (DockingService.HostWindow is null)
+        {
+            DockingService.HostWindow = new HostWindowInfo()
+            {
+                Location = HostWindow.Location,
+                Size = HostWindow.Size,
+                Maximized = HostWindow.Maximized,
+            };
+        }
+        if (!_inited)
+        {
+            BindHostWindowInfo();
+            DockingService.PutHostPanelOnTopOfVisibleList(DockScheme);
+            HostWindow.WindowFocusIn += (_, _) => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };
+
+            // Blazor can't rerender all components from scratch, so here's a workaround
+            DockingService.LayoutLoaded += () => { JSRuntime.InvokeVoidAsync("location.reload"); }; 
+
+            _inited = true;
+        }
+
+        if (DockingService.HostPanel != null)
+        {
+            DockScheme = DockingService.HostPanel;
+            HostLayoutInited.InvokeAsync();
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && DockingService.HostPanel is null)
+        {
+            DockingService.HostPanel = DockScheme;
+            StateHasChanged();
+            HostLayoutInited.InvokeAsync();
+        }
+    }
+
+    internal override void AddChildPanel(DockPanelBase panel)
+    {
+        DockPanelBaseScheme scheme = panel switch
+        {
+            DockPanel dockPanel => dockPanel.DockScheme,
+            DockPanelSplit dockPanelSplit => dockPanelSplit.DockScheme,
+            DockPanelTabs dockPanelTabs => dockPanelTabs.DockScheme,
+            _ => null
+        };
+
+        DockScheme.HostedPanel = scheme;
+    }
+}

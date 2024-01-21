@@ -1,0 +1,109 @@
+﻿@using Photino.Blazor.CustomWindow.Components
+@using Photino.Blazor.Docking.LayoutScheme
+@using PhotinoNET
+@using Microsoft.AspNetCore.Components.Web
+@using Radzen
+@using System.Drawing
+@using System.ComponentModel
+
+@inherits DockPanelContainer
+
+@inject DockingService DockingService
+
+<CustomWindow @ref="CustomWindow"
+              WindowColor="var(--rz-primary)" TitleColor="white" Title="@HeaderTitle" ShowIcon="false" MinSize="@(DockScheme.WindowMinSize)"
+              @bind-Location="@(DockScheme.WindowLocation)" @bind-Size="@(DockScheme.WindowSize)" @bind-Maximized="@(DockScheme.WindowMaximized)">
+
+    <HeaderCentralLayout>
+        <div class="pb-dock-panel-float-mosaic"></div>
+    </HeaderCentralLayout>
+
+    <WindowContent>
+        @if (!DockScheme.MarkedToDestroy)
+        {
+            <CascadingValue Name="ParentContainerScheme" Value="DockScheme">
+                <CascadingValue Name="DockScheme" Value="DockScheme.HostedPanel">
+                    <div class="pb-dock-panel-float" style="@(DockScheme.HostedPanel is DockPanelScheme dockPanel ? "border-top: none" : "")">
+                        @switch (DockScheme.HostedPanel)
+                        {
+                            case DockPanelScheme:
+                                <DockPanel />
+                                break;
+                            case DockPanelSplitScheme:
+                                <DockPanelSplit />
+                                break;
+                            case DockPanelTabsScheme:
+                                <DockPanelTabs />
+                                break;
+                        }
+
+                        <div class="pb-dock-panel-destroy-mask"
+                             style="@(DockingService.MovingFloatPanel == DockScheme &&
+                                      DockingService.DockToAttach.Zone != DockZone.Outside ?
+                                      "" : "opacity: 0")">
+                        </div>
+                    </div>
+                </CascadingValue>
+            </CascadingValue>
+        }
+    </WindowContent>
+</CustomWindow>
+
+@code {
+    private CustomWindow _customWindow;
+    private CustomWindow CustomWindow
+    {
+        get => _customWindow;
+        set
+        {
+            _customWindow = value;
+            _customWindow.WindowMoveBegin += () => { DockingService.FloatPanelMoveBegin(DockScheme); };
+            _customWindow.WindowMoveEnd += () => { DockingService.FloatPanelMoveEnd(); };
+            _customWindow.WindowMoving += DockingService.FloatPanelMoving;
+            _customWindow.WindowFocusIn += () => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };
+            _customWindow.WindowClosing += () => {
+                DockingService.FloatPanelClosing(DockScheme);
+                Dispose();
+                return false;
+            };
+        }
+    }
+
+    internal new DockPanelFloatScheme DockScheme
+    {
+        get => (DockPanelFloatScheme)base.DockScheme;
+        set => base.DockScheme = value;
+    }
+
+    private string HeaderTitle
+    {
+        get
+        {
+            var visiblePanels = DockScheme.HostedPanel.GetAllDockPanelsInside().Where(p => !p.IsHidden);
+            if (visiblePanels.Count() == 1)
+                return DockingService.GetPanelConfig(visiblePanels.Single().Id).Title;
+            else
+                return DockingService.MultiplePanelsTitle;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (DockingService.FloatPanelsCreateQueue.TryDequeue(out var floatPanel))
+        {
+            DockScheme = floatPanel;
+            DockingService.PutHostPanelOnTopOfVisibleList(DockScheme);
+
+            base.OnInitialized();
+            StateHasChanged();
+        }
+    }
+
+    protected override void OnDockSchemePropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        base.OnDockSchemePropertyChanged(sender, e);
+
+        if (DockScheme.MarkedToDestroy)
+            CustomWindow.Close();
+    }
+}

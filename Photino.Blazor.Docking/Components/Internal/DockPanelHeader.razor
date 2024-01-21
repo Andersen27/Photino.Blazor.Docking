@@ -1,0 +1,110 @@
+﻿@using Microsoft.JSInterop
+@using Photino.Blazor.Docking.LayoutScheme
+@using Microsoft.AspNetCore.Components.Web
+@using Radzen
+@using System.Drawing
+
+@inherits DockPanelBase
+
+@inject DockingService DockingService
+@inject IJSRuntime JSRuntime
+
+<div @ref="headerArea" class="pb-dock-panel-header @(IsDim ? "pb-dock-panel-header-dim" : "")"
+     style="@(DockScheme.IsDetachedGhost ? "opacity: 0.6" : "")"
+     @onpointerdown="OnPointerDown" @onpointerup="OnPointerUp" @onpointermove="OnPointerMove">
+
+    <p>@(DockingService.GetPanelConfig(DockScheme.Id).Title)</p>
+
+    <Radzen.Blazor.RadzenButton Icon="close" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="@(IsDim ? Shade.Darker : Shade.Default)"
+                                Click="OnCloseButtonClick" @onpointerdown:stopPropagation />
+</div>
+
+@code {
+    private const int MoveThreshold = 12;
+
+    private ElementReference headerArea;
+
+    private bool _movingProcess;
+    private Point? _moveBeginPosition;
+    private Point _moveBeginOffset;
+    private DockPanelFloatScheme _detachedFloatPanel;
+
+    private new DockPanelScheme DockScheme => (DockPanelScheme)base.DockScheme;
+
+    private bool IsDim
+    {
+        get
+        {
+            if (DockScheme.ParentContainer is DockPanelTabsScheme tabsContainer)
+                return tabsContainer.CurrentTab != DockScheme;
+            else
+                return false;
+        }
+    }
+    private bool CanBeDetached => DockingService.GetPanelConfig(DockScheme.Id).CanBeDetached;
+
+    private async Task OnPointerDown(MouseEventArgs e)
+    {
+        // Left Mouse Button
+        if (e.Button == 0)
+        {
+            if (DockScheme.ParentContainer is DockPanelTabsScheme tabsContainer)
+                tabsContainer.CurrentTab = DockScheme;
+
+            _moveBeginPosition = new Point((int)e.ScreenX, (int)e.ScreenY);
+            _moveBeginOffset = new Point((int)e.OffsetX, (int)e.OffsetY);
+            await JSRuntime.InvokeElementMethodAsync(headerArea, "setPointerCapture", 1);
+        }
+
+        // Middle Mouse Button
+        else if (e.Button == 1)
+        {
+            DockingService.CloseDockPanel(DockScheme);
+        }
+    }
+
+    private void OnPointerUp(MouseEventArgs e)
+    {
+        if (e.Button == 0)
+        {
+            _moveBeginPosition = null;
+
+            if (_movingProcess)
+            {
+                var dockToAttach = DockingService.DockToAttach;
+                if (!((dockToAttach.Panel?.IsDetachedGhost ?? false) && dockToAttach.Zone != DockZone.Outside))
+                    DockingService.ReleaseDockPanel(DockScheme);
+
+                DockingService.FloatPanelMoveEnd();
+
+                _movingProcess = false;
+            }
+        }
+    }
+
+    private void OnPointerMove(MouseEventArgs e)
+    {
+        if (!CanBeDetached || _moveBeginPosition is null)
+            return;
+
+        var pointerPos = new Point((int)e.ScreenX, (int)e.ScreenY);
+        if (_movingProcess)
+        {
+            _detachedFloatPanel.WindowLocation = new Point(pointerPos.X - _moveBeginOffset.X, pointerPos.Y - _moveBeginOffset.Y);
+            DockingService.FloatPanelMoving(e);
+        }
+        else
+        {
+            var moveOffset = new Point(Math.Abs(pointerPos.X - _moveBeginPosition.Value.X),
+                                       Math.Abs(pointerPos.Y - _moveBeginPosition.Value.Y));
+            if (Math.Sqrt(Math.Pow(moveOffset.X, 2) + Math.Pow(moveOffset.Y, 2)) > MoveThreshold)
+            {
+                _movingProcess = true;
+                _detachedFloatPanel = DockingService.DetachPanel(DockScheme, pointerPos, _moveBeginOffset);
+                DockingService.FloatPanelMoveBegin(_detachedFloatPanel);
+            }
+        }
+    }
+
+    private void OnCloseButtonClick() => DockingService.CloseDockPanel(DockScheme);
+}

@@ -1,0 +1,138 @@
+@using Microsoft.JSInterop
+@using Photino.Blazor.Docking.Components.Internal
+@using Photino.Blazor.Docking.LayoutScheme
+@using System.Drawing
+
+@inherits DockPanelBase
+
+@inject DockingService DockingService
+@inject PhotinoBlazorApp PhotinoBlazorApp
+@inject IJSRuntime JSRuntime
+
+@if (ParentComponent is null && DockScheme.ParentContainer != null)
+{
+    <div class="pb-dock-panel">
+        @if (ShowHeader)
+        {
+            <CascadingValue Name="DockScheme" Value="DockScheme">
+                <DockPanelHeader />
+            </CascadingValue>
+        }
+
+        <div @ref="dockPanelArea" class="pb-dock-panel-area">
+            <div class="pb-dock-panel-destroy-mask"
+                 style="@(ShowGhostMask ? "" : "opacity: 0")">
+            </div>
+
+            @if (!DockScheme.IsDetachedGhost)
+            {
+                <div class="pb-dock-panel-content">
+                    @PanelContent
+                </div>
+            }
+
+            @if (DockingService.DockToAttach.Panel == DockScheme)
+            {
+                <DockCompass PanelIsDetachedGhost="@(DockScheme.IsDetachedGhost)"
+                             DisabledZones="@UnavailableZones" />
+            }
+        </div>
+    </div>
+}
+
+@code
+{
+    private const string getDocumentSizeScript = "[document.documentElement.clientWidth, document.documentElement.clientHeight]";
+
+    private Point _documentOffset = Point.Empty;
+
+    private ElementReference dockPanelArea;
+
+    internal new DockPanelScheme DockScheme
+    {
+        get
+        {
+            if (base.DockScheme is not DockPanelScheme scheme)
+            {
+                scheme = new();
+                base.DockScheme = scheme;
+            }
+
+            return scheme;
+        }
+        set => base.DockScheme = value;
+    }
+
+    [Parameter]
+    public string Id
+    {
+        get => DockScheme.Id;
+        set => DockScheme.Id = value;
+    }
+
+    [Parameter]
+    public Type ComponentType
+    {
+        get => DockingService.GetPanelConfig(DockScheme.Id).ComponentType;
+        set => DockScheme.Id = DockingService.GetPanelConfig(value).Id;
+    }
+
+    private bool ShowHeader => !DockScheme.ParentContainer.OverrideHeaderView;
+    private bool ShowGhostMask
+    {
+        get
+        {
+            var dockToAttach = DockingService.DockToAttach;
+            return DockScheme.IsDetachedGhost && !(dockToAttach.Panel == DockScheme && dockToAttach.Zone != DockZone.Outside);
+        }
+    }
+    private DockZone UnavailableZones
+    {
+        get
+        {
+            return DockingService.GetPanelConfig(DockScheme.Id).DisabledZones | DockingService.GlobalDisabledDockZones;
+        }
+    }
+
+    private RenderFragment PanelContent => (builder) =>
+    {
+        builder.OpenComponent(0, ComponentType);
+        builder.CloseComponent();
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ParentComponent != null)
+            return;
+
+        var window = PhotinoBlazorApp.MainWindow;
+        if (!window.Chromeless)
+        {
+            var documentSize = await JSRuntime.InvokeAsync<int[]>("eval", getDocumentSizeScript);
+            var windowBorderWidth = (window.Width - documentSize[0]) / 2;
+            _documentOffset = new Point(windowBorderWidth, window.Height - documentSize[1] - windowBorderWidth);
+        }
+
+        DockingService.DockPanelMoveBegin += OnDockPanelMoveBegin;
+        DockingService.DockPanelToAttachChanged += () => InvokeAsync(StateHasChanged);
+        DockingService.DockZoneToAttachChanged += () =>
+        {
+            if (DockScheme.IsDetachedGhost)
+                InvokeAsync(StateHasChanged);
+        };
+    }
+
+    private async void OnDockPanelMoveBegin()
+    {
+        var area = await JSRuntime.GetElementBounds(dockPanelArea);
+        area.Offset(_documentOffset);
+        area.Offset(PhotinoBlazorApp.MainWindow.Location);
+        DockingService.SendDockPanelAreaInfo(DockScheme, area);
+    }
+
+    public override void Dispose()
+    {
+        DockingService.DockPanelMoveBegin -= OnDockPanelMoveBegin;
+        base.Dispose();
+    }
+}

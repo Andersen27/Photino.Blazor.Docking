@@ -1,0 +1,144 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Photino.Blazor.Docking.Components.Internal
+@using Photino.Blazor.Docking.LayoutScheme
+@using System.Globalization
+@using Radzen
+@using Radzen.Blazor
+@using System.Drawing
+
+@inherits DockPanelContainer
+
+@if (ParentComponent != null)
+{
+    <CascadingValue Name="ParentComponent" Value="this">
+        @ChildContent
+    </CascadingValue>
+}
+else
+{
+    @if (ShowFirstPanel || ShowSecodPanel)
+    {
+        <div class="pb-dock-panel-container pb-dock-panel-split">
+
+            <CascadingValue Name="ParentContainerScheme" Value="DockScheme">
+
+                <RadzenSplitter Resize="OnSplitterResize"
+                    Orientation="@(DockScheme.Orientation == SplitOrientation.Horizontal ? Radzen.Orientation.Horizontal : Radzen.Orientation.Vertical)">
+
+                        <RadzenSplitterPane Collapsible="false" Min="@($"{FirstPanelMinSize}px")" Collapsed="@(!ShowFirstPanel)"
+                                            BarVisible="@(ShowFirstPanel && ShowSecodPanel)"
+                                            Size="@($"{(Percent * 100.0).ToString(CultureInfo.InvariantCulture)}%")">
+                            <CascadingValue Name="DockScheme" Value="DockScheme.FirstPanel">
+                                @switch (DockScheme.FirstPanel)
+                                {
+                                    case DockPanelScheme:
+                                        <DockPanel />
+                                        break;
+                                    case DockPanelSplitScheme:
+                                        <DockPanelSplit />
+                                        break;
+                                    case DockPanelTabsScheme:
+                                        <DockPanelTabs />
+                                        break;
+                                }
+                            </CascadingValue>
+                        </RadzenSplitterPane>
+
+                        <RadzenSplitterPane Collapsible="false" Min="@($"{SecondPanelMinSize}px")" Collapsed="@(!ShowSecodPanel)">
+                            <CascadingValue Name="DockScheme" Value="DockScheme.SecondPanel">
+                                @switch (DockScheme.SecondPanel)
+                                {
+                                    case DockPanelScheme:
+                                        <DockPanel />
+                                        break;
+                                    case DockPanelSplitScheme:
+                                        <DockPanelSplit />
+                                        break;
+                                    case DockPanelTabsScheme:
+                                        <DockPanelTabs />
+                                        break;
+                                }
+                            </CascadingValue>
+                        </RadzenSplitterPane>
+
+                </RadzenSplitter>
+            </CascadingValue>
+        </div>
+    }
+}
+
+@code
+{
+    private const double SplitterWidth = 5;
+
+    internal new DockPanelSplitScheme DockScheme
+    {
+        get
+        {
+            if (base.DockScheme is not DockPanelSplitScheme splitScheme)
+            {
+                splitScheme = new();
+                base.DockScheme = splitScheme;
+            }
+
+            return splitScheme;
+        }
+        set => base.DockScheme = value;
+    }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public SplitOrientation Orientation
+    {
+        get => DockScheme.Orientation;
+        set => DockScheme.Orientation = value;
+    }
+
+    [Parameter]
+    public double Percent
+    {
+        get => DockScheme.Percent;
+        set => DockScheme.Percent = value;
+    }
+
+    private int FirstPanelMinSize {
+        get {
+            var minSize = DockScheme.FirstPanel?.ComputedMinSize ?? Size.Empty;
+            return DockScheme.Orientation == SplitOrientation.Horizontal ? minSize.Width : minSize.Height;
+        }
+    }
+    private int SecondPanelMinSize
+    {
+        get
+        {
+            var minSize = DockScheme.SecondPanel?.ComputedMinSize ?? Size.Empty;
+            return DockScheme.Orientation == SplitOrientation.Horizontal ? minSize.Width : minSize.Height;
+        }
+    }
+
+    private bool ShowFirstPanel => DockScheme.FirstPanel != null && !DockScheme.FirstPanel.ComputedIsHidden;
+    private bool ShowSecodPanel => DockScheme.SecondPanel != null && !DockScheme.SecondPanel.ComputedIsHidden;
+
+    private void OnSplitterResize(RadzenSplitterResizeEventArgs e)
+    {
+        DockScheme.Percent = e.NewSize / 100.0;
+    }
+
+    internal override void AddChildPanel(DockPanelBase panel)
+    {
+        DockPanelBaseScheme scheme = panel switch
+        {
+            DockPanel dockPanel => dockPanel.DockScheme,
+            DockPanelSplit dockPanelSplit => dockPanelSplit.DockScheme,
+            DockPanelTabs dockPanelTabs => dockPanelTabs.DockScheme,
+            _ => null
+        };
+
+        if (DockScheme.FirstPanel is null)
+            DockScheme.FirstPanel = scheme;
+        else if (DockScheme.SecondPanel is null)
+            DockScheme.SecondPanel = scheme;
+    }
+}

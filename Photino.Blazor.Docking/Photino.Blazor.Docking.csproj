@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsNotAsErrors>BL0007</WarningsNotAsErrors>
+
+        <Authors>Andersen27</Authors>
+        <Version>1.0.0-alpha</Version>
+        <PackageId>Photino.Blazor.Docking</PackageId>
+        <Title>Photino.Blazor.Docking</Title>
+        <Description>Docking system for Photino.Blazor applications with split, tabs and floating panels support</Description>
+        <PackageDescription>Docking system for Photino.Blazor applications with split, tabs and floating panels support</PackageDescription>
+        <PackageTags>photino;blazor;docking;dockable;dock;tiling;tile;layout;panel;panels;floating;float;window</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <RepositoryUrl>https://github.com/tryphotino/photino.Blazor</RepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>docking.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+        <None Include="..\docking.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Photino.Blazor" Version="2.7.0" />
+        <PackageReference Include="Photino.Blazor.CustomWindow" Version="1.0.1-alpha" />
+        <PackageReference Include="Radzen.Blazor" Version="4.23.7" />
+        <!--<PackageReference Include="Microsoft.AspNetCore.Components.WebView" Version="7.0.0" />-->
+    </ItemGroup>
+
+</Project>
