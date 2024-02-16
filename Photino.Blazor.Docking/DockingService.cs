@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Photino.Blazor.Docking;
 
@@ -31,6 +30,7 @@ public sealed class DockingService
     private DockingLayout _dockingLayout = new();
     private List<DockAreaInfo> _orderedDockPanelsAreaInfo = new();
     private List<DockPanelHostScheme> _hostPanelsByVisibleOrder = new();
+    private Dictionary<DockPanelFloatScheme, PhotinoBlazorApp> _floatPanelApps = new();
 
     internal string MultiplePanelsTitle { get; private set; } = string.Empty;
     internal bool RestoreHostWindow { get; private set; } = true;
@@ -96,6 +96,10 @@ public sealed class DockingService
 
         app.MainWindow.Chromeless = true;
         app.MainWindow.WindowCreated += (_, _) => app.MainWindow.Size = Size.Empty;
+
+        // hack to avoid application crashes on docking panel detaching
+        // reference to PhotinoBlazorApp instance must be stored
+        _floatPanelApps[floatPanel] = app;
 
         app.Run();
     }
@@ -185,7 +189,6 @@ public sealed class DockingService
         {
             AttachPanel(MovingFloatPanel.HostedPanel, DockToAttach.Panel, DockToAttach.Zone);
             MovingFloatPanel.Destroy(true);
-            FloatPanels.Remove(MovingFloatPanel);
         }
 
         DockToAttach.Panel = null;
@@ -244,6 +247,7 @@ public sealed class DockingService
                 CloseDockPanel(child);
         }
 
+        _floatPanelApps.Remove(floatPanel);
         _hostPanelsByVisibleOrder.Remove(floatPanel);
     }
 
