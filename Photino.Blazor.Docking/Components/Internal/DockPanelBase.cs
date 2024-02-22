@@ -9,9 +9,6 @@ public abstract class DockPanelBase : ComponentBase, IDisposable
 {
     private DockPanelBaseScheme _dockScheme;
 
-    [Inject]
-    private DockingService DockingService { get; set; }
-
     [CascadingParameter(Name = "DockScheme")]
     internal DockPanelBaseScheme DockScheme
     {

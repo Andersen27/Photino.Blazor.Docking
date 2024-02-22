@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Components.Internal;
 using Photino.Blazor.Docking.LayoutScheme;
 using System;
@@ -8,7 +9,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text.Json;
 
-namespace Photino.Blazor.Docking;
+namespace Photino.Blazor.Docking.Services;
 
 /// <summary>
 /// Singleton service for multi-window docking functionality.
@@ -23,6 +24,7 @@ public sealed class DockingService
         WriteIndented = true,
     };
 
+    private ScreensAgentService _screensAgentService;
     private Action<IServiceCollection> _servicesInitializer;
     private DockPanelConfig[] _panelsConfig = null;
     private Size _defaultFloatPanelSize = new Size(400, 600);
@@ -61,7 +63,8 @@ public sealed class DockingService
     public event Action LayoutLoaded;
     public event Action<string> DockPanelClosed;
 
-    internal DockingService(Action<IServiceCollection> servicesInitializer,
+    internal DockingService(ScreensAgentService screensAgentService,
+                            Action<IServiceCollection> servicesInitializer,
                             DockPanelConfig[] panelsConfig,
                             string multiplePanelsTitle = "",
                             bool restoreHostWindowOnOpen = true,
@@ -73,6 +76,7 @@ public sealed class DockingService
                 throw new Exception("Invalid docking service configuration: " +
                     "in the dock panels configuration set there are duplicates of identificators or panel types.");
 
+        _screensAgentService = screensAgentService;
         _servicesInitializer = servicesInitializer;
         _panelsConfig = panelsConfig;
         MultiplePanelsTitle = multiplePanelsTitle;
@@ -90,6 +94,7 @@ public sealed class DockingService
 
         var appBuilder = PhotinoBlazorAppBuilder.CreateDefault();
         appBuilder.Services.AddSingleton(this);
+        appBuilder.Services.AddSingleton(_screensAgentService);
         _servicesInitializer(appBuilder.Services);
         appBuilder.RootComponents.Add<DockPanelFloat>("app");
         var app = appBuilder.Build();
@@ -200,12 +205,12 @@ public sealed class DockingService
         DockPanelToAttachChanged?.Invoke();
     }
 
-    internal void FloatPanelMoving(MouseEventArgs e)
+    internal void FloatPanelMoving(PointerEventArgs e)
     {
         DockPanelScheme newPanel = default;
         DockZone newZone = default;
 
-        var pointerPos = new Point((int)e.ScreenX, (int)e.ScreenY);
+        var pointerPos = _screensAgentService.GetOSPointerPosition(e);
         foreach(var areaInfo in _orderedDockPanelsAreaInfo)
         {
             if (!areaInfo.Area.Contains(pointerPos))

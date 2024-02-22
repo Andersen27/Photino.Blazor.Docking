@@ -1,4 +1,6 @@
-﻿using Photino.Blazor.Docking;
+﻿using Photino.Blazor.CustomWindow.Services;
+using Photino.Blazor.Docking;
+using Photino.Blazor.Docking.Services;
 using System;
 using System.Drawing;
 
@@ -37,7 +39,9 @@ public static class ServiceCollectionExtensions
                                                              Size? panelsMinSize = null,
                                                              Size? defaultFloatPanelSize = null)
     {
+        var screensAgentService = new ScreensAgentService();
         var dockingService = new DockingService (
+            screensAgentService,
             servicesInitializer,
             panelsConfig,
             multiplePanelsTitle,
@@ -45,6 +49,8 @@ public static class ServiceCollectionExtensions
             panelsMinSize,
             defaultFloatPanelSize
         );
+
+        services.AddSingleton(screensAgentService);
         services.AddSingleton(dockingService);
         return services;
     }

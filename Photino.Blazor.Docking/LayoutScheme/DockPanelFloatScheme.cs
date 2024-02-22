@@ -16,7 +16,16 @@ internal sealed class DockPanelFloatScheme : DockPanelHostScheme
         }
     }
 
-    public Size WindowSize { get; set; }
+    private Size _windowSize;
+    public Size WindowSize
+    {
+        get => _windowSize;
+        set
+        {
+            _windowSize = value;
+            NotifyPropertyChanged(nameof(WindowSize));
+        }
+    }
     public bool WindowMaximized { get; set; }
     public Size WindowMinSize => HostedPanel.ComputedMinSize;
 

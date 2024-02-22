@@ -1,5 +1,7 @@
 ﻿@using Microsoft.JSInterop
+@using Photino.Blazor.CustomWindow.Services
 @using Photino.Blazor.Docking.LayoutScheme
+@using Photino.Blazor.Docking.Services
 @using Microsoft.AspNetCore.Components.Web
 @using Radzen
 @using System.Drawing
@@ -7,6 +9,7 @@
 @inherits DockPanelBase
 
 @inject DockingService DockingService
+@inject ScreensAgentService ScreensAgentService
 @inject IJSRuntime JSRuntime
 
 <div @ref="headerArea" class="pb-dock-panel-header @(IsDim ? "pb-dock-panel-header-dim" : "")"
@@ -43,7 +46,7 @@
     }
     private bool CanBeDetached => DockingService.GetPanelConfig(DockScheme.Id).CanBeDetached;
 
-    private async Task OnPointerDown(MouseEventArgs e)
+    private async Task OnPointerDown(PointerEventArgs e)
     {
         // Left Mouse Button
         if (e.Button == 0)
@@ -51,8 +54,9 @@
             if (DockScheme.ParentContainer is DockPanelTabsScheme tabsContainer)
                 tabsContainer.CurrentTab = DockScheme;
 
-            _moveBeginPosition = new Point((int)e.ScreenX, (int)e.ScreenY);
-            _moveBeginOffset = new Point((int)e.OffsetX, (int)e.OffsetY);
+            var scale = ScreensAgentService.GetPointerPositionScaleFactor(e);
+            _moveBeginPosition = ScreensAgentService.GetOSPointerPosition(e);
+            _moveBeginOffset = new Point((int)(e.OffsetX * scale), (int)(e.OffsetY * scale));
             await JSRuntime.InvokeElementMethodAsync(headerArea, "setPointerCapture", 1);
         }
 
@@ -77,17 +81,22 @@
 
                 DockingService.FloatPanelMoveEnd();
 
+                // hack to force update layout scale when working with different scaled screens
+                var targetSize = _detachedFloatPanel.WindowSize;
+                _detachedFloatPanel.WindowSize = new Size(targetSize.Width, targetSize.Height - 1);
+                _detachedFloatPanel.WindowSize = targetSize;
+
                 _movingProcess = false;
             }
         }
     }
 
-    private void OnPointerMove(MouseEventArgs e)
+    private void OnPointerMove(PointerEventArgs e)
     {
         if (!CanBeDetached || _moveBeginPosition is null)
             return;
 
-        var pointerPos = new Point((int)e.ScreenX, (int)e.ScreenY);
+        var pointerPos = ScreensAgentService.GetOSPointerPosition(e);
         if (_movingProcess)
         {
             _detachedFloatPanel.WindowLocation = new Point(pointerPos.X - _moveBeginOffset.X, pointerPos.Y - _moveBeginOffset.Y);
