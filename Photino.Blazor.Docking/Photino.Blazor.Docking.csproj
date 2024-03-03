@@ -26,12 +26,9 @@
 
     <ItemGroup>
         <PackageReference Include="Photino.Blazor" Version="2.7.0" />
-        <PackageReference Include="Radzen.Blazor" Version="4.23.7" />
+        <PackageReference Include="Photino.Blazor.CustomWindow" Version="1.1.2" />
+        <PackageReference Include="Radzen.Blazor" Version="4.25.9" />
         <!--<PackageReference Include="Microsoft.AspNetCore.Components.WebView" Version="7.0.0" />-->
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\Photino.Blazor.CustomWindow\Photino.Blazor.CustomWindow\Photino.Blazor.CustomWindow.csproj" />
     </ItemGroup>
 
 </Project>

@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Photino.Blazor.Docking", "P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Photino.Blazor.Docking.Sample", "Photino.Blazor.Docking.Sample\Photino.Blazor.Docking.Sample.csproj", "{37D3180D-35F7-4281-BE7E-A9EC5A0A30F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Photino.Blazor.CustomWindow", "..\Photino.Blazor.CustomWindow\Photino.Blazor.CustomWindow\Photino.Blazor.CustomWindow.csproj", "{C291ED62-FB82-4907-9F00-E7BCD3AF2205}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{37D3180D-35F7-4281-BE7E-A9EC5A0A30F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37D3180D-35F7-4281-BE7E-A9EC5A0A30F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37D3180D-35F7-4281-BE7E-A9EC5A0A30F9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C291ED62-FB82-4907-9F00-E7BCD3AF2205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C291ED62-FB82-4907-9F00-E7BCD3AF2205}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C291ED62-FB82-4907-9F00-E7BCD3AF2205}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C291ED62-FB82-4907-9F00-E7BCD3AF2205}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

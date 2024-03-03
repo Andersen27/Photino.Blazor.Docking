@@ -8,7 +8,8 @@ Supports hiding/showing panels by its identificators and saving/loading docking 
 
 ## How to use
 1. Include **Photino.Blazor.Docking** as PackageReference to your project.
-2. Copy files from [Photino.Blazor.Docking/wwwroot](Photino.Blazor.Docking/wwwroot) and [Photino.Blazor.CustomWindow/wwwroot](https://github.com/Andersen27/Photino.Blazor.CustomWindow/tree/master/Photino.Blazor.CustomWindow/wwwroot) folders to your wwwroot.
+2. Include css and js files from _content/Radzen.Blazor, _content/Photino.Blazor.CustomWindow and _content/Photino.Blazor.Docking to your index.html as shown in the [example](Photino.Blazor.Docking.Sample/wwwroot/index.html).\
+   Or you can add their contents manually as your own files.
 3. Configure and add DockingService to your Photino.Blazor application service collection with `AddPhotinoBlazorDocking()` extension.\
    You must declare services initialization function and dock panels configuration set (refer to the extension summary and [example](Photino.Blazor.Docking.Sample/Program.cs)).
 4. Use `DockPanelHost` component as docking host component. Next, there are two options for the panels initial placement:
@@ -20,6 +21,5 @@ Supports hiding/showing panels by its identificators and saving/loading docking 
      DockPanel must be used strictly with the identificator or blazor component, specified in the configuration.
 
 ## Next steps
-- At the moment the project works correctly only for screens with a 100% zoom factor. See Photino.Blazor.CustomWindow [next steps](https://github.com/Andersen27/Photino.Blazor.CustomWindow?tab=readme-ov-file#next-steps).
-- Optimize the code to avoid crashes.
+- Dynamic page adding (documents host panel).
 - Get away from Radzen dependencies (own splitter implementation).
