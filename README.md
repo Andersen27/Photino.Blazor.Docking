@@ -19,7 +19,12 @@ Supports hiding/showing panels by its identificators and saving/loading docking 
      DockPanelSplit should contain two components of the types listed above.\
      DockPanelTabs can contain only DockPanel components.\
      DockPanel must be used strictly with the identificator or blazor component, specified in the configuration.
+5. In order to keep the current state of your component when attaching/detaching dock panel, it is necessary to implement a mechanism for store/restore state data. There are two ways that you can use together:
+   - Storing data in your own services and restoring it from there on component initializing.
+   - Using `IContextDockPanel` interface. Implement it for your component using the `PanelContext` property for any object as state context (for example, a model instance, scroll positions, etc.).\
+     [Implementation example](Photino.Blazor.Docking.Sample/Pages/Counter.razor).
 
 ## Next steps
+- Inserting float dock panel between specific tabs on dragging.
 - Dynamic page adding (documents host panel).
 - Get away from Radzen dependencies (own splitter implementation).

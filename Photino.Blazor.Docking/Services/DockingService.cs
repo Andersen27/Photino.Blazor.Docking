@@ -3,10 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Components.Internal;
 using Photino.Blazor.Docking.LayoutScheme;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text.Json;
 
 namespace Photino.Blazor.Docking.Services;
@@ -30,9 +27,9 @@ public sealed class DockingService
     private Size _defaultFloatPanelSize = new Size(400, 600);
     private Point _defaultFloatPanelLocationOffset = new Point(50, 50);
     private DockingLayout _dockingLayout = new();
-    private List<DockAreaInfo> _orderedDockPanelsAreaInfo = new();
-    private List<DockPanelHostScheme> _hostPanelsByVisibleOrder = new();
-    private Dictionary<DockPanelFloatScheme, PhotinoBlazorApp> _floatPanelApps = new();
+    private List<DockAreaInfo> _orderedDockPanelsAreaInfo = [];
+    private List<DockPanelHostScheme> _hostPanelsByVisibleOrder = [];
+    private Dictionary<DockPanelFloatScheme, PhotinoBlazorApp> _floatPanelApps = [];
 
     internal string MultiplePanelsTitle { get; private set; } = string.Empty;
     internal bool RestoreHostWindow { get; private set; } = true;

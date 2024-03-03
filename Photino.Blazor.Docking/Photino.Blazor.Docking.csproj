@@ -2,11 +2,13 @@
 
     <PropertyGroup>
         <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <WarningsNotAsErrors>BL0007</WarningsNotAsErrors>
 
         <Authors>Andersen27</Authors>
-        <Version>1.0.0-alpha</Version>
+        <Version>1.1.0</Version>
         <PackageId>Photino.Blazor.Docking</PackageId>
         <Title>Photino.Blazor.Docking</Title>
         <Description>Docking system for Photino.Blazor applications with split, tabs and floating panels support</Description>

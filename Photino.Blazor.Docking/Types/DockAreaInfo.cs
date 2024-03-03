@@ -1,5 +1,4 @@
 ﻿using Photino.Blazor.Docking.LayoutScheme;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 
@@ -11,7 +10,7 @@ internal struct DockAreaInfo
     private const int CompassCenterZoneSize = 38;
 
     private DockZone _disabledZones;
-    private Dictionary<DockZone, Rectangle> _compassZonesBounds = new();
+    private Dictionary<DockZone, Rectangle> _compassZonesBounds = [];
 
     public int OrderIndex { get; set; }
     public DockPanelScheme Panel { get; set; }

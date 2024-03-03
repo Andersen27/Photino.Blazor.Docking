@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Photino.Blazor.Docking.LayoutScheme;
-using System;
 using System.ComponentModel;
 
 namespace Photino.Blazor.Docking.Components.Internal;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Photino.Blazor.Docking;
+﻿namespace Photino.Blazor.Docking;
 
 /// <summary>
 /// Dock panel configuration.
