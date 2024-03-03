@@ -59,6 +59,33 @@ internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
     [JsonIgnore]
     public override Size ComputedMinSize => MinSize;
 
+    public Func<object> GetPanelContextFunc { get; set; }
+
+    private object _panelContextToRestore;
+    private bool _panelContextStored;
+
+    public void StorePanelContext()
+    {
+        _panelContextStored = GetPanelContextFunc != null;
+        _panelContextToRestore = GetPanelContextFunc?.Invoke();
+    }
+
+    public bool TryRestorePanelContext(out object context)
+    {
+        if (_panelContextStored)
+        {
+            context = _panelContextToRestore;
+            _panelContextToRestore = null;
+            _panelContextStored = false;
+            return true;
+        }
+        else
+        {
+            context = null;
+            return false;
+        }
+    }
+
     public override DockPanelScheme FindDockPanel(string id)
     {
         return Id == id ? this : null;
@@ -76,6 +103,8 @@ internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
         return new DockPanelScheme() {
             Id = Id,
             IsHidden = IsHidden,
+            _panelContextStored = GetPanelContextFunc != null,
+            _panelContextToRestore = GetPanelContextFunc?.Invoke(),
         };
     }
     #endregion

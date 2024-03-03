@@ -135,11 +135,14 @@ public sealed class DockingService
 
     internal void AttachPanel(DockPanelBaseScheme attachingPanel, DockPanelScheme targetPanel, DockZone attachingZone)
     {
+        foreach(var dockPanel in attachingPanel.GetAllDockPanelsInside())
+            dockPanel.StorePanelContext();
+
         if (targetPanel.IsDetachedGhost)
         {
+            targetPanel.StorePanelContext();
             targetPanel.IsDetachedGhost = false;
         }
-
         else if(attachingZone == DockZone.Center)
         {
             var attachingDockPanel = (DockPanelScheme)attachingPanel;
@@ -162,7 +165,6 @@ public sealed class DockingService
                 targetPanelParent.ReplaceChildPanel(targetPanel, newTabsPanel);
             }
         }
-
         else
         {
             DockPanelBaseScheme actualTargetPanel = targetPanel.ParentContainer is DockPanelTabsScheme tabsPanelParent ?
