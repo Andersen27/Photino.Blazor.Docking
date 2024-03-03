@@ -119,7 +119,9 @@
 
     private async void OnDockPanelMoveBegin()
     {
-        var area = await JSRuntime.GetElementBounds(dockPanelArea, true);
+        var bounds = await JSRuntime.GetElementBounds(dockPanelArea, true);
+        var area = bounds.Item1;
+        var areaScaleFactor = bounds.Item2;
 
         var window = PhotinoBlazorApp.MainWindow;
         var documentOffset = Point.Empty;
@@ -132,7 +134,7 @@
 
         area.Offset(documentOffset);
         area.Offset(window.Location);
-        DockingService.SendDockPanelAreaInfo(DockScheme, area);
+        DockingService.StoreDockPanelAreaInfo(DockScheme, area, areaScaleFactor);
     }
 
     public override void Dispose()

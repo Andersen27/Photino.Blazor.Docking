@@ -268,7 +268,7 @@ public sealed class DockingService
         _hostPanelsByVisibleOrder.Insert(0, hostPanel);
     }
 
-    internal void SendDockPanelAreaInfo(DockPanelScheme dockPanel, Rectangle area)
+    internal void StoreDockPanelAreaInfo(DockPanelScheme dockPanel, Rectangle area, double areaScaleFactor)
     {
         if (dockPanel.IsDetachedGhost)
         {
@@ -278,7 +278,7 @@ public sealed class DockingService
         {
             var orderIndex = _hostPanelsByVisibleOrder.IndexOf(dockPanel.GetTopParent());
             var disabledZones = GetPanelConfig(dockPanel.Id).DisabledZones | GlobalDisabledDockZones;
-            var dockAreaInfo = new DockAreaInfo(orderIndex, dockPanel, area, disabledZones);
+            var dockAreaInfo = new DockAreaInfo(orderIndex, dockPanel, area, areaScaleFactor, disabledZones);
 
             var insertIndex = _orderedDockPanelsAreaInfo.Count > 0 && _orderedDockPanelsAreaInfo.First().OrderIndex < dockAreaInfo.OrderIndex ?
                 _orderedDockPanelsAreaInfo.FindIndex(i => i.OrderIndex >= dockAreaInfo.OrderIndex) : 0;
