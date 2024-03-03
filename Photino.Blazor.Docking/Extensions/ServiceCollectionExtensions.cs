@@ -1,4 +1,5 @@
-﻿using Photino.Blazor.CustomWindow.Services;
+﻿using Microsoft.AspNetCore.Components;
+using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking;
 using Photino.Blazor.Docking.Services;
 using System.Drawing;
@@ -18,6 +19,11 @@ public static class ServiceCollectionExtensions
     /// Dock panels configuration set.
     /// For each panel specify at least a non-repeating Blazor component type, a unique identificator and a localized title.
     /// </param>
+    /// <param name="floatPanelWrapperComponent">
+    /// The root wrapper component for each float panel.
+    /// The layout of child panels will be rendered as a nested <see cref="RenderFragment"/> of the specified component.
+    /// Must be subclass of <see cref="ComponentBase"/> and have ChildContent parameter.
+    /// </param>
     /// <param name="multiplePanelsTitle">
     /// Title displayed in the header of floating panel with more than one visible dock panels inside.
     /// </param>
@@ -33,6 +39,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddPhotinoBlazorDocking(this IServiceCollection services,
                                                              Action<IServiceCollection> servicesInitializer,
                                                              DockPanelConfig[] panelsConfig,
+                                                             Type floatPanelWrapperComponent = null,
                                                              string multiplePanelsTitle = "",
                                                              bool restoreHostWindowOnOpen = true,
                                                              Size? panelsMinSize = null,
@@ -43,6 +50,7 @@ public static class ServiceCollectionExtensions
             screensAgentService,
             servicesInitializer,
             panelsConfig,
+            floatPanelWrapperComponent,
             multiplePanelsTitle,
             restoreHostWindowOnOpen,
             panelsMinSize,

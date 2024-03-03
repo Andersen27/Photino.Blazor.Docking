@@ -22,30 +22,32 @@
     <WindowContent>
         @if (!DockScheme.MarkedToDestroy)
         {
-            <CascadingValue Name="ParentContainerScheme" Value="DockScheme">
-                <CascadingValue Name="DockScheme" Value="DockScheme.HostedPanel">
-                    <div class="pb-dock-panel-float" style="@(DockScheme.HostedPanel is DockPanelScheme dockPanel ? "border-top: none" : "")">
-                        @switch (DockScheme.HostedPanel)
-                        {
-                            case DockPanelScheme:
-                                <DockPanel />
-                                break;
-                            case DockPanelSplitScheme:
-                                <DockPanelSplit />
-                                break;
-                            case DockPanelTabsScheme:
-                                <DockPanelTabs />
-                                break;
-                        }
+            <DockPanelFloatWrapper>
+                <CascadingValue Name="ParentContainerScheme" Value="DockScheme">
+                    <CascadingValue Name="DockScheme" Value="DockScheme.HostedPanel">
+                        <div class="pb-dock-panel-float" style="@(DockScheme.HostedPanel is DockPanelScheme dockPanel ? "border-top: none" : "")">
+                            @switch (DockScheme.HostedPanel)
+                            {
+                                case DockPanelScheme:
+                                    <DockPanel />
+                                    break;
+                                case DockPanelSplitScheme:
+                                    <DockPanelSplit />
+                                    break;
+                                case DockPanelTabsScheme:
+                                    <DockPanelTabs />
+                                    break;
+                            }
 
-                        <div class="pb-dock-panel-destroy-mask"
-                             style="@(DockingService.MovingFloatPanel == DockScheme &&
-                                      DockingService.DockToAttach.Zone != DockZone.Outside ?
-                                      "" : "opacity: 0")">
+                            <div class="pb-dock-panel-destroy-mask"
+                                 style="@(DockingService.MovingFloatPanel == DockScheme &&
+                                          DockingService.DockToAttach.Zone != DockZone.Outside ?
+                                          "" : "opacity: 0")">
+                            </div>
                         </div>
-                    </div>
+                    </CascadingValue>
                 </CascadingValue>
-            </CascadingValue>
+            </DockPanelFloatWrapper>
         }
     </WindowContent>
 </CustomWindow>

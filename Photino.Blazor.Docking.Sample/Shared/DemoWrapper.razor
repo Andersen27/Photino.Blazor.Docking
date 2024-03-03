@@ -1,0 +1,10 @@
+﻿<div style="height: 100%">
+	@ChildContent
+</div>
+
+@*<Radzen.Blazor.RadzenComponents />*@
+
+@code {
+	[Parameter]
+	public RenderFragment ChildContent { get; set; }
+}

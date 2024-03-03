@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Web;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Components.Internal;
@@ -31,8 +32,9 @@ public sealed class DockingService
     private List<DockPanelHostScheme> _hostPanelsByVisibleOrder = [];
     private Dictionary<DockPanelFloatScheme, PhotinoBlazorApp> _floatPanelApps = [];
 
-    internal string MultiplePanelsTitle { get; private set; } = string.Empty;
-    internal bool RestoreHostWindow { get; private set; } = true;
+    internal Type FloatPanelWrapperComponent { get; private set; } = null;
+    internal string MultiplePanelsTitle { get; private init; } = string.Empty;
+    internal bool RestoreHostWindow { get; private init; } = true;
     internal DockAttachInfo DockToAttach { get; private set; } = new();
     internal DockPanelFloatScheme MovingFloatPanel { get; private set; }
     internal DockZone GlobalDisabledDockZones { get; private set; }
@@ -63,6 +65,7 @@ public sealed class DockingService
     internal DockingService(ScreensAgentService screensAgentService,
                             Action<IServiceCollection> servicesInitializer,
                             DockPanelConfig[] panelsConfig,
+                            Type floatPanelWrapperComponent = null,
                             string multiplePanelsTitle = "",
                             bool restoreHostWindowOnOpen = true,
                             Size? panelsMinSize = null,
@@ -71,11 +74,16 @@ public sealed class DockingService
         foreach (var panelConfig in panelsConfig)
             if (panelsConfig.Count(p => p.Id == panelConfig.Id || p.ComponentType == panelConfig.ComponentType) > 1)
                 throw new Exception("Invalid docking service configuration: " +
-                    "in the dock panels configuration set there are duplicates of identificators or panel types.");
+                    "there are duplicates of identificators or panel types in the dock panels configuration set.");
+
+        if (!floatPanelWrapperComponent?.IsSubclassOf(typeof(ComponentBase)) ?? false)
+            throw new Exception("Invalid docking service configuration: " +
+                "floatPanelWrapperComponent type must be subclass of ComponentBase.");
 
         _screensAgentService = screensAgentService;
         _servicesInitializer = servicesInitializer;
         _panelsConfig = panelsConfig;
+        FloatPanelWrapperComponent = floatPanelWrapperComponent;
         MultiplePanelsTitle = multiplePanelsTitle;
         RestoreHostWindow = restoreHostWindowOnOpen;
 

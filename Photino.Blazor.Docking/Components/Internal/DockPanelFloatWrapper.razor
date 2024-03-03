@@ -1,0 +1,24 @@
+﻿@using Photino.Blazor.Docking.Services
+
+@inject DockingService DockingService
+
+@if (DockingService.FloatPanelWrapperComponent?.IsSubclassOf(typeof(ComponentBase)) ?? false)
+{
+    @WrappedContent
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private RenderFragment WrappedContent => (builder) =>
+    {
+        builder.OpenComponent(0, DockingService.FloatPanelWrapperComponent);
+        builder.AddAttribute(1, "ChildContent", ChildContent);
+        builder.CloseComponent();
+    };
+}
