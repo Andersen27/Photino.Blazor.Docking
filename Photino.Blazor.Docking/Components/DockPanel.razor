@@ -1,6 +1,7 @@
 @using Microsoft.JSInterop
 @using Photino.Blazor.Docking.Components.Internal
 @using Photino.Blazor.Docking.LayoutScheme
+@using Photino.Blazor.Docking.Services
 @using System.Drawing
 
 @inherits DockPanelBase
@@ -42,9 +43,9 @@
 
 @code
 {
-    private const string getDocumentSizeScript = "[document.documentElement.clientWidth, document.documentElement.clientHeight]";
-
-    private Point _documentOffset = Point.Empty;
+    private const string GetDocumentSizeScript =
+        @"[document.documentElement.clientWidth * window.devicePixelRatio,
+           document.documentElement.clientHeight * window.devicePixelRatio]";
 
     private ElementReference dockPanelArea;
 
@@ -97,21 +98,24 @@
     private RenderFragment PanelContent => (builder) =>
     {
         builder.OpenComponent(0, ComponentType);
+        builder.AddComponentReferenceCapture(1, component =>
+        {
+            if (component is IContextDockPanel contextDockPanel)
+            {
+                DockScheme.GetPanelContextFunc = () => contextDockPanel.PanelContext;
+                if (DockScheme.TryRestorePanelContext(out var context))
+                    contextDockPanel.PanelContext = context;
+            }
+        });
         builder.CloseComponent();
     };
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
+        base.OnInitialized();
+
         if (ParentComponent != null)
             return;
-
-        var window = PhotinoBlazorApp.MainWindow;
-        if (!window.Chromeless)
-        {
-            var documentSize = await JSRuntime.InvokeAsync<int[]>("eval", getDocumentSizeScript);
-            var windowBorderWidth = (window.Width - documentSize[0]) / 2;
-            _documentOffset = new Point(windowBorderWidth, window.Height - documentSize[1] - windowBorderWidth);
-        }
 
         DockingService.DockPanelMoveBegin += OnDockPanelMoveBegin;
         DockingService.DockPanelToAttachChanged += () => InvokeAsync(StateHasChanged);
@@ -124,10 +128,22 @@
 
     private async void OnDockPanelMoveBegin()
     {
-        var area = await JSRuntime.GetElementBounds(dockPanelArea);
-        area.Offset(_documentOffset);
-        area.Offset(PhotinoBlazorApp.MainWindow.Location);
-        DockingService.SendDockPanelAreaInfo(DockScheme, area);
+        var bounds = await JSRuntime.GetElementBounds(dockPanelArea, true);
+        var area = bounds.Item1;
+        var areaScaleFactor = bounds.Item2;
+
+        var window = PhotinoBlazorApp.MainWindow;
+        var documentOffset = Point.Empty;
+        if (!window.Chromeless)
+        {
+            var documentSize = await JSRuntime.InvokeAsync<double[]>("eval", GetDocumentSizeScript);
+            var windowBorderWidth = (window.Width - (int)documentSize[0]) / 2;
+            documentOffset = new Point(windowBorderWidth, window.Height - (int)documentSize[1] - windowBorderWidth);
+        }
+
+        area.Offset(documentOffset);
+        area.Offset(window.Location);
+        DockingService.StoreDockPanelAreaInfo(DockScheme, area, areaScaleFactor);
     }
 
     public override void Dispose()

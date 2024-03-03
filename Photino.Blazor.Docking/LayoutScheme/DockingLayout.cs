@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Photino.Blazor.Docking.LayoutScheme;
+﻿namespace Photino.Blazor.Docking.LayoutScheme;
 
 internal sealed class DockingLayout
 {
@@ -13,7 +11,7 @@ internal sealed class DockingLayout
 
     public DockPanelHostScheme HostPanel { get; set; } = null;
 
-    public List<DockPanelFloatScheme> FloatPanels { get; set; } = new();
+    public List<DockPanelFloatScheme> FloatPanels { get; set; } = [];
 
     public DockPanelScheme FindDockPanel(string id, out DockPanelHostScheme hostPanel)
     {

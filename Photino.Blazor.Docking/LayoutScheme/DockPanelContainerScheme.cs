@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Photino.Blazor.Docking.LayoutScheme;
+﻿namespace Photino.Blazor.Docking.LayoutScheme;
 
 internal abstract class DockPanelContainerScheme : DockPanelBaseScheme
 {

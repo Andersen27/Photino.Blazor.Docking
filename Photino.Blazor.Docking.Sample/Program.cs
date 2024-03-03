@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.Docking.Sample.Pages;
 using Photino.Blazor.Docking.Sample.Services;
+using Photino.Blazor.Docking.Sample.Shared;
 using Index = Photino.Blazor.Docking.Sample.Pages.Index;
 
 namespace Photino.Blazor.Docking.Sample;
@@ -31,6 +32,7 @@ class Program
                 new DockPanelConfig(typeof(TestPage2), "testPage2", "Test page #2"),
                 new DockPanelConfig(typeof(TestFloatPanel), "testFloatPanel", "Test float panel"),
             ]
+            //, typeof(DemoWrapper)
         );
 
         // register root component and selector

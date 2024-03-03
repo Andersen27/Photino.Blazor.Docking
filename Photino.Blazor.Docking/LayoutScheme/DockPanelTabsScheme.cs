@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+﻿using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace Photino.Blazor.Docking.LayoutScheme;
@@ -10,7 +7,7 @@ internal sealed class DockPanelTabsScheme : DockPanelContainerScheme
 {
     internal override bool OverrideHeaderView => VisiblePanels.Count() > 1;
 
-    private List<DockPanelScheme> _panels = new();
+    private List<DockPanelScheme> _panels = [];
     public List<DockPanelScheme> Panels
     {
         get => _panels;

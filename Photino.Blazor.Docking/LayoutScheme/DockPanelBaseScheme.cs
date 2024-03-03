@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Photino.Blazor.Docking.LayoutScheme;

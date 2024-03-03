@@ -1,14 +1,19 @@
 ﻿@page "/counter"
 
+@implements Photino.Blazor.Docking.IContextDockPanel
+
 <h1>Counter</h1>
-
 <p>Current count: @currentCount</p>
-
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
-    private int currentCount = 0;
+    public object PanelContext
+    {
+        get => currentCount;
+        set => currentCount = (int)value;
+    }
 
+    private int currentCount = 0;
     private void IncrementCount()
     {
         currentCount++;

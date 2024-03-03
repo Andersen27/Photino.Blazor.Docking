@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Photino.Blazor.Docking.LayoutScheme;
-using System;
 using System.ComponentModel;
 
 namespace Photino.Blazor.Docking.Components.Internal;
@@ -8,9 +7,6 @@ namespace Photino.Blazor.Docking.Components.Internal;
 public abstract class DockPanelBase : ComponentBase, IDisposable
 {
     private DockPanelBaseScheme _dockScheme;
-
-    [Inject]
-    private DockingService DockingService { get; set; }
 
     [CascadingParameter(Name = "DockScheme")]
     internal DockPanelBaseScheme DockScheme

@@ -1,12 +1,15 @@
 ﻿@using Microsoft.JSInterop
+@using Photino.Blazor.CustomWindow.Services
 @using Photino.Blazor.Docking.Components.Internal
 @using Photino.Blazor.Docking.LayoutScheme
+@using Photino.Blazor.Docking.Services
 @using PhotinoNET
 @using System.Drawing
 
 @inherits DockPanelContainer
 
 @inject DockingService DockingService
+@inject ScreensAgentService ScreensAgentService
 @inject PhotinoBlazorApp PhotinoBlazorApp
 @inject IJSRuntime JSRuntime
 
@@ -82,7 +85,7 @@ else
         HostWindow.WindowMaximized += (_, _) => HostWindowInfo.Maximized = HostWindow.Maximized;
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (DockingService.HostWindow is null)
         {
@@ -95,6 +98,7 @@ else
         }
         if (!_inited)
         {
+            await ScreensAgentService.Initialize(JSRuntime);
             BindHostWindowInfo();
             DockingService.PutHostPanelOnTopOfVisibleList(DockScheme);
             HostWindow.WindowFocusIn += (_, _) => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };
@@ -108,7 +112,7 @@ else
         if (DockingService.HostPanel != null)
         {
             DockScheme = DockingService.HostPanel;
-            HostLayoutInited.InvokeAsync();
+            await HostLayoutInited.InvokeAsync();
         }
     }
 

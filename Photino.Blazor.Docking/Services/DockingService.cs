@@ -1,15 +1,13 @@
-﻿using Microsoft.AspNetCore.Components.Web;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Components.Internal;
 using Photino.Blazor.Docking.LayoutScheme;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace Photino.Blazor.Docking;
+namespace Photino.Blazor.Docking.Services;
 
 /// <summary>
 /// Singleton service for multi-window docking functionality.
@@ -24,16 +22,19 @@ public sealed class DockingService
         WriteIndented = true,
     };
 
+    private ScreensAgentService _screensAgentService;
     private Action<IServiceCollection> _servicesInitializer;
     private DockPanelConfig[] _panelsConfig = null;
     private Size _defaultFloatPanelSize = new Size(400, 600);
     private Point _defaultFloatPanelLocationOffset = new Point(50, 50);
     private DockingLayout _dockingLayout = new();
-    private List<DockAreaInfo> _orderedDockPanelsAreaInfo = new();
-    private List<DockPanelHostScheme> _hostPanelsByVisibleOrder = new();
+    private List<DockAreaInfo> _orderedDockPanelsAreaInfo = [];
+    private List<DockPanelHostScheme> _hostPanelsByVisibleOrder = [];
+    private Dictionary<DockPanelFloatScheme, PhotinoBlazorApp> _floatPanelApps = [];
 
-    internal string MultiplePanelsTitle { get; private set; } = string.Empty;
-    internal bool RestoreHostWindow { get; private set; } = true;
+    internal Type FloatPanelWrapperComponent { get; private set; } = null;
+    internal string MultiplePanelsTitle { get; private init; } = string.Empty;
+    internal bool RestoreHostWindow { get; private init; } = true;
     internal DockAttachInfo DockToAttach { get; private set; } = new();
     internal DockPanelFloatScheme MovingFloatPanel { get; private set; }
     internal DockZone GlobalDisabledDockZones { get; private set; }
@@ -61,8 +62,10 @@ public sealed class DockingService
     public event Action LayoutLoaded;
     public event Action<string> DockPanelClosed;
 
-    internal DockingService(Action<IServiceCollection> servicesInitializer,
+    internal DockingService(ScreensAgentService screensAgentService,
+                            Action<IServiceCollection> servicesInitializer,
                             DockPanelConfig[] panelsConfig,
+                            Type floatPanelWrapperComponent = null,
                             string multiplePanelsTitle = "",
                             bool restoreHostWindowOnOpen = true,
                             Size? panelsMinSize = null,
@@ -71,10 +74,16 @@ public sealed class DockingService
         foreach (var panelConfig in panelsConfig)
             if (panelsConfig.Count(p => p.Id == panelConfig.Id || p.ComponentType == panelConfig.ComponentType) > 1)
                 throw new Exception("Invalid docking service configuration: " +
-                    "in the dock panels configuration set there are duplicates of identificators or panel types.");
+                    "there are duplicates of identificators or panel types in the dock panels configuration set.");
 
+        if (!floatPanelWrapperComponent?.IsSubclassOf(typeof(ComponentBase)) ?? false)
+            throw new Exception("Invalid docking service configuration: " +
+                "floatPanelWrapperComponent type must be subclass of ComponentBase.");
+
+        _screensAgentService = screensAgentService;
         _servicesInitializer = servicesInitializer;
         _panelsConfig = panelsConfig;
+        FloatPanelWrapperComponent = floatPanelWrapperComponent;
         MultiplePanelsTitle = multiplePanelsTitle;
         RestoreHostWindow = restoreHostWindowOnOpen;
 
@@ -90,12 +99,17 @@ public sealed class DockingService
 
         var appBuilder = PhotinoBlazorAppBuilder.CreateDefault();
         appBuilder.Services.AddSingleton(this);
+        appBuilder.Services.AddSingleton(_screensAgentService);
         _servicesInitializer(appBuilder.Services);
         appBuilder.RootComponents.Add<DockPanelFloat>("app");
         var app = appBuilder.Build();
 
         app.MainWindow.Chromeless = true;
         app.MainWindow.WindowCreated += (_, _) => app.MainWindow.Size = Size.Empty;
+
+        // hack to avoid application crashes on docking panel detaching
+        // reference to PhotinoBlazorApp instance must be stored
+        _floatPanelApps[floatPanel] = app;
 
         app.Run();
     }
@@ -126,11 +140,14 @@ public sealed class DockingService
 
     internal void AttachPanel(DockPanelBaseScheme attachingPanel, DockPanelScheme targetPanel, DockZone attachingZone)
     {
+        foreach(var dockPanel in attachingPanel.GetAllDockPanelsInside())
+            dockPanel.StorePanelContext();
+
         if (targetPanel.IsDetachedGhost)
         {
+            targetPanel.StorePanelContext();
             targetPanel.IsDetachedGhost = false;
         }
-
         else if(attachingZone == DockZone.Center)
         {
             var attachingDockPanel = (DockPanelScheme)attachingPanel;
@@ -153,7 +170,6 @@ public sealed class DockingService
                 targetPanelParent.ReplaceChildPanel(targetPanel, newTabsPanel);
             }
         }
-
         else
         {
             DockPanelBaseScheme actualTargetPanel = targetPanel.ParentContainer is DockPanelTabsScheme tabsPanelParent ?
@@ -185,7 +201,6 @@ public sealed class DockingService
         {
             AttachPanel(MovingFloatPanel.HostedPanel, DockToAttach.Panel, DockToAttach.Zone);
             MovingFloatPanel.Destroy(true);
-            FloatPanels.Remove(MovingFloatPanel);
         }
 
         DockToAttach.Panel = null;
@@ -197,12 +212,12 @@ public sealed class DockingService
         DockPanelToAttachChanged?.Invoke();
     }
 
-    internal void FloatPanelMoving(MouseEventArgs e)
+    internal void FloatPanelMoving(PointerEventArgs e)
     {
         DockPanelScheme newPanel = default;
         DockZone newZone = default;
 
-        var pointerPos = new Point((int)e.ScreenX, (int)e.ScreenY);
+        var pointerPos = _screensAgentService.GetOSPointerPosition(e);
         foreach(var areaInfo in _orderedDockPanelsAreaInfo)
         {
             if (!areaInfo.Area.Contains(pointerPos))
@@ -244,6 +259,7 @@ public sealed class DockingService
                 CloseDockPanel(child);
         }
 
+        _floatPanelApps.Remove(floatPanel);
         _hostPanelsByVisibleOrder.Remove(floatPanel);
     }
 
@@ -259,7 +275,7 @@ public sealed class DockingService
         _hostPanelsByVisibleOrder.Insert(0, hostPanel);
     }
 
-    internal void SendDockPanelAreaInfo(DockPanelScheme dockPanel, Rectangle area)
+    internal void StoreDockPanelAreaInfo(DockPanelScheme dockPanel, Rectangle area, double areaScaleFactor)
     {
         if (dockPanel.IsDetachedGhost)
         {
@@ -269,7 +285,7 @@ public sealed class DockingService
         {
             var orderIndex = _hostPanelsByVisibleOrder.IndexOf(dockPanel.GetTopParent());
             var disabledZones = GetPanelConfig(dockPanel.Id).DisabledZones | GlobalDisabledDockZones;
-            var dockAreaInfo = new DockAreaInfo(orderIndex, dockPanel, area, disabledZones);
+            var dockAreaInfo = new DockAreaInfo(orderIndex, dockPanel, area, areaScaleFactor, disabledZones);
 
             var insertIndex = _orderedDockPanelsAreaInfo.Count > 0 && _orderedDockPanelsAreaInfo.First().OrderIndex < dockAreaInfo.OrderIndex ?
                 _orderedDockPanelsAreaInfo.FindIndex(i => i.OrderIndex >= dockAreaInfo.OrderIndex) : 0;
