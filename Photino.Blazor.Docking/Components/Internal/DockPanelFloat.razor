@@ -62,7 +62,7 @@
             _customWindow = value;
             _customWindow.WindowMoveBegin += () => { DockingService.FloatPanelMoveBegin(DockScheme); };
             _customWindow.WindowMoveEnd += () => { DockingService.FloatPanelMoveEnd(); };
-            _customWindow.WindowMoving += DockingService.FloatPanelMoving;
+            _customWindow.WindowMoving += async (e) => { await DockingService.FloatPanelMovingAsync(e); };
             _customWindow.WindowFocusIn += () => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };
             _customWindow.WindowClosing += () => {
                 DockingService.FloatPanelClosing(DockScheme);

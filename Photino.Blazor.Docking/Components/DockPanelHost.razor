@@ -98,7 +98,7 @@ else
         }
         if (!_inited)
         {
-            await ScreensAgentService.Initialize(JSRuntime);
+            await ScreensAgentService.InitializeIfNeed(JSRuntime);
             BindHostWindowInfo();
             DockingService.PutHostPanelOnTopOfVisibleList(DockScheme);
             HostWindow.WindowFocusIn += (_, _) => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };
