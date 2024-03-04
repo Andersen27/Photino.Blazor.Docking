@@ -3,6 +3,7 @@
 @using Photino.Blazor.Docking.LayoutScheme
 @using Photino.Blazor.Docking.Services
 @using System.Drawing
+@using System.Reflection
 
 @inherits DockPanelBase
 
@@ -100,12 +101,12 @@
         builder.OpenComponent(0, ComponentType);
         builder.AddComponentReferenceCapture(1, component =>
         {
-            if (component is IContextDockPanel contextDockPanel)
+            if (DockScheme.TryRestoreComponentInstance(out var instance))
             {
-                DockScheme.GetPanelContextFunc = () => contextDockPanel.PanelContext;
-                if (DockScheme.TryRestorePanelContext(out var context))
-                    contextDockPanel.PanelContext = context;
+                foreach (FieldInfo field in ComponentType.GetRuntimeFields().Where(f => !f.IsStatic))
+                    field.SetValue(component, field.GetValue(instance));
             }
+            DockScheme.GetComponentInstanceFunc = () => component;
         });
         builder.CloseComponent();
     };

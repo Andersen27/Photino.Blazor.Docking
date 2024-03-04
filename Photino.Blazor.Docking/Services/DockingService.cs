@@ -141,11 +141,11 @@ public sealed class DockingService
     internal void AttachPanel(DockPanelBaseScheme attachingPanel, DockPanelScheme targetPanel, DockZone attachingZone)
     {
         foreach(var dockPanel in attachingPanel.GetAllDockPanelsInside())
-            dockPanel.StorePanelContext();
+            dockPanel.StoreComponentInstance();
 
         if (targetPanel.IsDetachedGhost)
         {
-            targetPanel.StorePanelContext();
+            targetPanel.StoreComponentInstance();
             targetPanel.IsDetachedGhost = false;
         }
         else if(attachingZone == DockZone.Center)
