@@ -15,6 +15,7 @@ internal sealed class DockPanelSplitScheme : DockPanelContainerScheme
 
     public override void ReplaceChildPanel(DockPanelBaseScheme oldPanel, DockPanelBaseScheme newPanel)
     {
+        base.ReplaceChildPanel(oldPanel, newPanel);
         if (FirstPanel == oldPanel)
         {
             FirstPanel = newPanel;

@@ -1,10 +1,13 @@
 ﻿using System.Drawing;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace Photino.Blazor.Docking.LayoutScheme;
 
 internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
 {
+    private Dictionary<FieldInfo, object> _storedComponentState = null;
+
     public static Size MinSize { get; set; } = new Size(100, 100);
 
     public string Id { get; set; } = string.Empty;
@@ -59,29 +62,35 @@ internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
     [JsonIgnore]
     public Func<object> GetComponentInstanceFunc { get; set; }
 
-    private object _componentInstanceToRestore;
-    private bool _componentInstanceStored;
-
-    public void StoreComponentInstance()
+    public void StoreComponentState()
     {
-        _componentInstanceStored = true;
-        _componentInstanceToRestore = GetComponentInstanceFunc();
+        //#if DEBUG
+        //if (_storedComponentState != null) throw new Exception();
+        //#endif
+
+        var component = GetComponentInstanceFunc();
+
+        _storedComponentState = [];
+        foreach (var field in component.GetType().GetRuntimeFields().Where(f => !f.IsStatic))
+        {
+            try { _storedComponentState[field] = field.GetValue(component); }
+            catch { }
+        }
     }
 
-    public bool TryRestoreComponentInstance(out object instance)
+    public bool TryRestoreComponentState(object newComponent)
     {
-        if (_componentInstanceStored)
-        {
-            instance = _componentInstanceToRestore;
-            _componentInstanceToRestore = null;
-            _componentInstanceStored = false;
-            return true;
-        }
-        else
-        {
-            instance = null;
+        if (_storedComponentState is null)
             return false;
+
+        foreach (var (field, value) in _storedComponentState)
+        {
+            try { field.SetValue(newComponent, value); }
+            catch { }
         }
+
+        _storedComponentState = null;
+        return true;
     }
 
     public override DockPanelScheme FindDockPanel(string id)
@@ -98,12 +107,14 @@ internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
     #region ICloneable
     public object Clone()
     {
-        return new DockPanelScheme() {
+        var newInstance = new DockPanelScheme() {
             Id = Id,
             IsHidden = IsHidden,
-            _componentInstanceStored = true,
-            _componentInstanceToRestore = GetComponentInstanceFunc(),
+            GetComponentInstanceFunc = GetComponentInstanceFunc,
         };
+        newInstance.StoreComponentState();
+
+        return newInstance;
     }
     #endregion
 }

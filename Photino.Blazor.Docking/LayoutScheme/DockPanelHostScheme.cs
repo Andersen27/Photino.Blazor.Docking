@@ -8,6 +8,7 @@ internal class DockPanelHostScheme : DockPanelContainerScheme
 
     public override void ReplaceChildPanel(DockPanelBaseScheme oldPanel, DockPanelBaseScheme newPanel)
     {
+        base.ReplaceChildPanel(oldPanel, newPanel);
         if (HostedPanel == oldPanel)
         {
             HostedPanel = newPanel;

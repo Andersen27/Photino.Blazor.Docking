@@ -79,7 +79,7 @@
             {
                 var dockToAttach = DockingService.DockToAttach;
                 if (!((dockToAttach.Panel?.IsDetachedGhost ?? false) && dockToAttach.Zone != DockZone.Outside))
-                    DockingService.ReleaseDockPanel(DockScheme);
+                    DockingService.ReleaseGhostPanel(DockScheme);
 
                 DockingService.FloatPanelMoveEnd();
 

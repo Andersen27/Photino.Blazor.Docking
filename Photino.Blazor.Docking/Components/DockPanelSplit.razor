@@ -16,7 +16,7 @@
 }
 else
 {
-    @if (ShowFirstPanel || ShowSecodPanel)
+    @if (DockScheme.FirstPanel != null && DockScheme.SecondPanel != null)
     {
         <div class="pb-dock-panel-container pb-dock-panel-split">
 
@@ -118,8 +118,8 @@ else
         }
     }
 
-    private bool ShowFirstPanel => DockScheme.FirstPanel != null && !DockScheme.FirstPanel.ComputedIsHidden;
-    private bool ShowSecodPanel => DockScheme.SecondPanel != null && !DockScheme.SecondPanel.ComputedIsHidden;
+    private bool ShowFirstPanel => !DockScheme.FirstPanel.ComputedIsHidden;
+    private bool ShowSecodPanel => !DockScheme.SecondPanel.ComputedIsHidden;
 
     private void OnSplitterResize(RadzenSplitterResizeEventArgs e)
     {

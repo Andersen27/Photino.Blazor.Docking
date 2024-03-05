@@ -6,6 +6,7 @@ internal abstract class DockPanelContainerScheme : DockPanelBaseScheme
 
     public virtual void ReplaceChildPanel(DockPanelBaseScheme oldPanel, DockPanelBaseScheme newPanel)
     {
+        newPanel.StoreComponentsStateInside();
     }
     public virtual void DetachChildPanel(DockPanelScheme detachingPanel, out DockPanelBaseScheme lastPanel)
     {

@@ -8,7 +8,7 @@
         <WarningsNotAsErrors>BL0007</WarningsNotAsErrors>
 
         <Authors>Andersen27</Authors>
-        <Version>1.1.1</Version>
+        <Version>1.1.2</Version>
         <PackageId>Photino.Blazor.Docking</PackageId>
         <Title>Photino.Blazor.Docking</Title>
         <Description>Docking system for Photino.Blazor applications with split, tabs and floating panels support</Description>

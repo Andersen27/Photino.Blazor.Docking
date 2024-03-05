@@ -11,7 +11,7 @@
 @inject PhotinoBlazorApp PhotinoBlazorApp
 @inject IJSRuntime JSRuntime
 
-@if (ParentComponent is null && DockScheme.ParentContainer != null)
+@if (ParentComponent is null && DockScheme.ParentContainer != null && !DockScheme.IsHidden)
 {
     <div class="pb-dock-panel">
         @if (ShowHeader)
@@ -26,12 +26,9 @@
                  style="@(ShowGhostMask ? "" : "opacity: 0")">
             </div>
 
-            @if (!DockScheme.IsDetachedGhost)
-            {
-                <div class="pb-dock-panel-content">
-                    @PanelContent
-                </div>
-            }
+            <div class="pb-dock-panel-content" style="@(DockScheme.IsDetachedGhost ? "display: none" : "")">
+                @PanelContent
+            </div>
 
             @if (DockingService.DockToAttach.Panel == DockScheme)
             {
@@ -101,11 +98,7 @@
         builder.OpenComponent(0, ComponentType);
         builder.AddComponentReferenceCapture(1, component =>
         {
-            if (DockScheme.TryRestoreComponentInstance(out var instance))
-            {
-                foreach (FieldInfo field in ComponentType.GetRuntimeFields().Where(f => !f.IsStatic))
-                    field.SetValue(component, field.GetValue(instance));
-            }
+            DockScheme.TryRestoreComponentState(component);
             DockScheme.GetComponentInstanceFunc = () => component;
         });
         builder.CloseComponent();
@@ -129,6 +122,9 @@
 
     private async void OnDockPanelMoveBegin()
     {
+        if (DockScheme.IsHidden)
+            return;
+
         var bounds = await JSRuntime.GetElementBounds(dockPanelArea, true);
         var area = bounds.Item1;
         var areaScaleFactor = bounds.Item2;
