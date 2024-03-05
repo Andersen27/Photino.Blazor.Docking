@@ -18,8 +18,10 @@
 
     <p>@(DockingService.GetPanelConfig(DockScheme.Id).Title)</p>
 
-    <Radzen.Blazor.RadzenButton Icon="close" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="@(IsDim ? Shade.Darker : Shade.Default)"
-                                Click="OnCloseButtonClick" @onpointerdown:stopPropagation />
+    <button @onclick="OnCloseButtonClick" @onpointerdown:stopPropagation
+            class="pb-custom-window-control-button" style="--pb-custom-window-header-height: 28px">
+        <svg viewBox="0 0 22 22"><path d="m6 7l1-1 4 4 4-4 1 1-4 4 4 4-1 1-4-4-4 4-1-1 4-4z" /></svg>
+    </button>
 </div>
 
 @code {

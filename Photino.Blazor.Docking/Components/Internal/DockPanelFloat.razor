@@ -12,7 +12,13 @@
 @inject DockingService DockingService
 
 <CustomWindow @ref="CustomWindow"
-              WindowColor="var(--rz-primary)" TitleColor="white" Title="@HeaderTitle" ShowIcon="false" MinSize="@(DockScheme.WindowMinSize)"
+              Title="@HeaderTitle" ShowIcon="false" MinSize="@(DockScheme.WindowMinSize)"
+              Style="--pb-custom-window-main-color: var(--pb-docking-main-color);
+                     --pb-custom-window-title-color: var(--pb-docking-title-color);
+                     --pb-custom-window-background-color: var(--pb-docking-background-color);
+                     --pb-custom-window-controls-color: var(--pb-docking-controls-color);
+                     --pb-custom-window-controls-color-hover: var(--pb-docking-controls-color-hover);
+                     --pb-custom-window-close-control-color: var(--pb-docking-float-close-control-color);"
               @bind-Location="@(DockScheme.WindowLocation)" @bind-Size="@(DockScheme.WindowSize)" @bind-Maximized="@(DockScheme.WindowMaximized)">
 
     <HeaderCentralLayout>

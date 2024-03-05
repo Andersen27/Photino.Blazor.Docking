@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor.CustomWindow.Services;
-using Photino.Blazor.Docking;
 using Photino.Blazor.Docking.Services;
 using System.Drawing;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Photino.Blazor.Docking.Extensions;
 
 public static class ServiceCollectionExtensions
 {
