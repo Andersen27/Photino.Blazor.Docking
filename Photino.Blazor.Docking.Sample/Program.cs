@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Photino.Blazor.Docking.Extensions;
 using Photino.Blazor.Docking.Sample.Pages;
 using Photino.Blazor.Docking.Sample.Services;
 using Photino.Blazor.Docking.Sample.Shared;

@@ -24,6 +24,12 @@ internal abstract class DockPanelBaseScheme : INotifyPropertyChanged
     {
         yield break;
     }
+    public void StoreComponentsStateInside()
+    {
+        foreach (var dockPanel in GetAllDockPanelsInside().Where(d => !d.IsHidden))
+            dockPanel.StoreComponentState();
+    }
+
     protected IEnumerable<DockPanelContainerScheme> GetParentsChain()
     {
         if (ParentContainer is null)

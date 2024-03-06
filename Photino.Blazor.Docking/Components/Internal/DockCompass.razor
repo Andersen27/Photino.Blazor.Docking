@@ -21,12 +21,14 @@
         @if (PanelIsDetachedGhost)
         {
             <svg x="40" y="40">
+                <path d="M4 4h24v24h-24z" fill-opacity="var(--pb-docking-compass-fill-opacity)" />
                 <use xlink:href="#dockzone" />
                 <path d="M4 4h24v24h-24zm1 3v20h22v-20z" />
             </svg>
         }
         else
         {
+            <path d="M0 36h26l10-10v-26h40v26l10 10h26v40h-26l-10 10v26h-40v-26l-10-10h-26z" fill-opacity="var(--pb-docking-compass-fill-opacity)" />
             <path d="M0 36h26l10-10v-26h40v26l10 10h26v40h-26l-10 10v26h-40v-26l-10-10h-26zm1 1v38h25.707l10.293 10.293v25.707h38v-25.707l10.293-10.293h25.707v-38h-25.707l-10.293-10.293v-25.707h-38v25.707l-10.293 10.293z" />
 
             @if ((DisabledZones & DockZone.Center) != DockZone.Center)

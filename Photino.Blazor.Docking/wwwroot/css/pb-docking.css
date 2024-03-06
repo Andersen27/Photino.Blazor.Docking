@@ -1,17 +1,34 @@
+:root {
+    --pb-docking-main-color: var(--rz-primary);
+    --pb-docking-main-color-dim: var(--rz-primary-darker);
+    --pb-docking-layout-color: var(--rz-primary);
+    --pb-docking-float-secondary-color: var(--rz-primary-light);
+    --pb-docking-title-color: var(--rz-on-primary);
+    --pb-docking-background-color: var(--rz-base-background-color);
+    --pb-docking-controls-color: rgba(0,0,0,0);
+    --pb-docking-controls-color-hover: rgba(0,0,0,.25);
+    --pb-docking-float-close-control-color: var(--rz-danger-dark);
+    --pb-docking-compass-color: var(--rz-text-color);
+    --pb-docking-compass-shadow-color: rgba(0, 0, 0, 0.2);
+    --pb-docking-compass-fill-opacity: 0.075;
+}
+
 .pb-dock-panel-container {
     width: 100%;
     height: 100%;
-    background-color: var(--rz-base-200);
+    background-color: var(--pb-docking-background-color);
 }
 
 .pb-dock-panel-host {
+    --pb-custom-window-controls-color: var(--pb-docking-controls-color);
+    --pb-custom-window-controls-color-hover: var(--pb-docking-controls-color-hover);
 }
 
 .pb-dock-panel-float {
     width: 100%;
     height: 100%;
     position: relative;
-    border-top: 2px solid var(--rz-primary-darker);
+    border-top: 2px solid var(--pb-docking-float-secondary-color);
 }
 
     .pb-dock-panel-float > * {
@@ -19,7 +36,8 @@
     }
 
 .pb-dock-panel-float-mosaic {
-    background-image: radial-gradient(circle at center, var(--rz-primary-light) 1px, transparent 0), radial-gradient(circle at center, var(--rz-primary-light) 1px, transparent 0);
+    background-image: radial-gradient(circle at center, var(--pb-docking-float-secondary-color) 1px, transparent 0),
+                      radial-gradient(circle at center, var(--pb-docking-float-secondary-color) 1px, transparent 0);
     background-size: 6px 6px;
     background-position: 2px 2px, 5px 5px;
     height: 16px;
@@ -51,7 +69,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid var(--rz-primary);
+    border: 1px solid var(--pb-docking-main-color);
 }
 
 .pb-dock-panel-area {
@@ -71,7 +89,7 @@
 .pb-dock-area-preview-zone {
     position: absolute;
     opacity: 0.4;
-    background-color: var(--rz-primary);
+    background-color: var(--pb-docking-layout-color);
     transition: 0.15s;
 }
 
@@ -80,7 +98,11 @@
     height: 100%;
     pointer-events: none;
     opacity: 0.4;
-    background: repeating-linear-gradient( -45deg, rgb(from var(--rz-primary) r g b / 50%), rgb(from var(--rz-primary) r g b / 50%) 10px, var(--rz-primary) 10px, var(--rz-primary) 20px );
+    background: repeating-linear-gradient(-45deg,
+                                          rgb(from var(--pb-docking-layout-color) r g b / 50%),
+                                          rgb(from var(--pb-docking-layout-color) r g b / 50%) 10px,
+                                          var(--pb-docking-layout-color) 10px,
+                                          var(--pb-docking-layout-color) 20px );
     transition: 0.1s;
 }
 
@@ -96,8 +118,8 @@
     justify-content: space-between;
     align-items: center;
     padding-left: 5px;
-    background-color: var(--rz-primary);
-    color: var(--rz-on-primary);
+    background-color: var(--pb-docking-main-color);
+    color: var(--pb-docking-title-color);
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -105,7 +127,7 @@
 }
 
 .pb-dock-panel-header-dim {
-    background-color: var(--rz-primary-darker);
+    background-color: var(--pb-docking-main-color-dim);
 }
 
 .pb-dock-panel-header p {
@@ -126,5 +148,6 @@
     bottom: 0;
     left: 0;
     right: 0;
-    fill: var(--rz-text-color);
+    fill: var(--pb-docking-compass-color);
+    filter: drop-shadow(0px 0px 20px var(--pb-docking-compass-shadow-color));
 }

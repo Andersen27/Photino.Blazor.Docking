@@ -114,12 +114,14 @@ public sealed class DockingService
         app.Run();
     }
 
-    internal void ReleaseDockPanel(DockPanelScheme panel)
+    internal void ReleaseGhostPanel(DockPanelScheme panel)
     {
         var parent = panel.ParentContainer;
         parent.DetachChildPanel(panel, out var lastPanel);
         if (lastPanel != null)
+        {
             parent.ParentContainer.ReplaceChildPanel(parent, lastPanel);
+        }
     }
 
     internal DockPanelFloatScheme DetachPanel(DockPanelScheme panel, Point mousePos, Point headerOffset)
@@ -140,12 +142,11 @@ public sealed class DockingService
 
     internal void AttachPanel(DockPanelBaseScheme attachingPanel, DockPanelScheme targetPanel, DockZone attachingZone)
     {
-        foreach(var dockPanel in attachingPanel.GetAllDockPanelsInside())
-            dockPanel.StorePanelContext();
+        DockPanelBaseScheme actualTargetPanel = targetPanel.ParentContainer is DockPanelTabsScheme tabsPanelParent ?
+                tabsPanelParent : targetPanel;
 
         if (targetPanel.IsDetachedGhost)
         {
-            targetPanel.StorePanelContext();
             targetPanel.IsDetachedGhost = false;
         }
         else if(attachingZone == DockZone.Center)
@@ -153,6 +154,7 @@ public sealed class DockingService
             var attachingDockPanel = (DockPanelScheme)attachingPanel;
             if (targetPanel.ParentContainer is DockPanelTabsScheme tabsPanel)
             {
+                attachingDockPanel.StoreComponentState();
                 tabsPanel.Panels.Add(attachingDockPanel);
                 tabsPanel.CurrentTabIndex = tabsPanel.Panels.Count - 1;
             }
@@ -161,7 +163,7 @@ public sealed class DockingService
                 var targetPanelParent = targetPanel.ParentContainer;
                 var newTabsPanel = new DockPanelTabsScheme()
                 {
-                    Panels = new() { targetPanel, attachingDockPanel },
+                    Panels = [targetPanel, attachingDockPanel],
                     CurrentTabIndex = 1,
                 };
                 targetPanel.ParentContainer = newTabsPanel;
@@ -172,9 +174,6 @@ public sealed class DockingService
         }
         else
         {
-            DockPanelBaseScheme actualTargetPanel = targetPanel.ParentContainer is DockPanelTabsScheme tabsPanelParent ?
-                tabsPanelParent : targetPanel;
-
             var targetPanelParent = actualTargetPanel.ParentContainer;
             var newSplitPanel = new DockPanelSplitScheme() {
                 FirstPanel = attachingZone is DockZone.Left or DockZone.Top ? attachingPanel : actualTargetPanel,
@@ -372,9 +371,8 @@ public sealed class DockingService
     /// </summary>
     public void ResetLayout()
     {
-        foreach (var floatPanel in FloatPanels)
-            if (floatPanel.ComputedIsHidden == false)
-                floatPanel.Destroy();
+        foreach (var floatPanel in FloatPanels.Where(fp => !fp.ComputedIsHidden))
+            floatPanel.Destroy();
 
         _dockingLayout = new();
         LayoutLoaded?.Invoke();
@@ -408,15 +406,13 @@ public sealed class DockingService
             return false;
         }
 
-        foreach (var floatPanel in FloatPanels)
-            if (floatPanel.ComputedIsHidden == false)
-                floatPanel.Destroy();
+        foreach (var floatPanel in FloatPanels.Where(fp => !fp.ComputedIsHidden))
+            floatPanel.Destroy();
 
         _dockingLayout = newLayout;
 
-        foreach (var floatPanel in FloatPanels)
-            if (floatPanel.ComputedIsHidden == false)
-                CreateFloatPanel(floatPanel);
+        foreach (var floatPanel in FloatPanels.Where(fp => !fp.ComputedIsHidden))
+            CreateFloatPanel(floatPanel);
 
         LayoutLoaded?.Invoke();
         return true;

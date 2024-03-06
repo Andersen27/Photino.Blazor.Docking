@@ -38,8 +38,8 @@ internal sealed class DockPanelTabsScheme : DockPanelContainerScheme
     [JsonIgnore]
     public DockPanelScheme CurrentTab
     {
-        get => VisiblePanels.Count() > 0 ? Panels[CurrentTabIndex] : null;
-        set => CurrentTabIndex = Panels.IndexOf(value);
+        get => VisiblePanels.Any() ? Panels[CurrentTabIndex] : null;
+        set => CurrentTabIndex = Math.Max(0, Panels.IndexOf(value));
     }
 
     public override void ReplaceChildPanel(DockPanelBaseScheme oldPanel, DockPanelBaseScheme newPanel)
@@ -47,6 +47,7 @@ internal sealed class DockPanelTabsScheme : DockPanelContainerScheme
         if (oldPanel is not DockPanelScheme oldTab || newPanel is not DockPanelScheme newTab)
             throw new NotSupportedException();
 
+        base.ReplaceChildPanel(oldPanel, newPanel);
         var oldTabIndex = Panels.IndexOf(oldTab);
         if (oldTabIndex != -1)
         {
@@ -57,15 +58,35 @@ internal sealed class DockPanelTabsScheme : DockPanelContainerScheme
 
     public override void DetachChildPanel(DockPanelScheme detachingPanel, out DockPanelBaseScheme lastPanel)
     {
-        lastPanel = null;
-        Panels.Remove(detachingPanel);
-        if (CurrentTabIndex > Panels.Count - 1)
-            CurrentTabIndex -= 1;
+        #if DEBUG
+        if (Panels.Count < 2) throw new Exception();
+        #endif
 
-        if (Panels.Count == 1)
-            lastPanel = Panels.First();
+        var panelRemoved = false;
+        DockPanelScheme prevPanel = null, nextPanel = null;
+        foreach (var panel in VisiblePanels.ToArray())
+        {
+            if (panelRemoved)
+            {
+                if (prevPanel != null || nextPanel != null)
+                    panel.StoreComponentState();
+                nextPanel ??= panel;
+            }
+            else
+            {
+                if (panel == detachingPanel)
+                    panelRemoved = Panels.Remove(panel);
+                else
+                    prevPanel = panel;
+            }
+        }
+        CurrentTab = nextPanel ?? prevPanel;
+        lastPanel = Panels.Count > 1 ? null : Panels.First();
 
         NotifyPropertyChanged(nameof(Panels));
+
+        if (!VisiblePanels.Any())
+            ParentContainer.NotifyPropertyChanged(nameof(ComputedIsHidden));
     }
 
     public override IEnumerable<DockPanelScheme> GetAllDockPanelsInside()

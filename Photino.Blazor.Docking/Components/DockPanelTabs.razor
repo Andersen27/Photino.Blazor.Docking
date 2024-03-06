@@ -15,7 +15,7 @@
 }
 else
 {
-    @if (DockScheme.CurrentTab != null)
+    @if (DockScheme.CurrentTab != null && DockScheme.Panels.Count > 1)
     {
         <div class="pb-dock-panel-container pb-dock-panel-tabs">
 
@@ -32,7 +32,7 @@ else
                     </div>
                 }
 
-                @foreach (var panel in DockScheme.VisiblePanels)
+                @foreach (var panel in DockScheme.Panels)
                 {
                     <div class="pb-dock-panel-tab" style="@(DockScheme.CurrentTab != panel ? "display: none" : "")">
                         <CascadingValue Name="DockScheme" Value="panel">

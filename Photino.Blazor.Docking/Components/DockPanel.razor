@@ -3,6 +3,7 @@
 @using Photino.Blazor.Docking.LayoutScheme
 @using Photino.Blazor.Docking.Services
 @using System.Drawing
+@using System.Reflection
 
 @inherits DockPanelBase
 
@@ -10,7 +11,7 @@
 @inject PhotinoBlazorApp PhotinoBlazorApp
 @inject IJSRuntime JSRuntime
 
-@if (ParentComponent is null && DockScheme.ParentContainer != null)
+@if (ParentComponent is null && DockScheme.ParentContainer != null && !DockScheme.IsHidden)
 {
     <div class="pb-dock-panel">
         @if (ShowHeader)
@@ -25,12 +26,9 @@
                  style="@(ShowGhostMask ? "" : "opacity: 0")">
             </div>
 
-            @if (!DockScheme.IsDetachedGhost)
-            {
-                <div class="pb-dock-panel-content">
-                    @PanelContent
-                </div>
-            }
+            <div class="pb-dock-panel-content" style="@(DockScheme.IsDetachedGhost ? "display: none" : "")">
+                @PanelContent
+            </div>
 
             @if (DockingService.DockToAttach.Panel == DockScheme)
             {
@@ -100,12 +98,8 @@
         builder.OpenComponent(0, ComponentType);
         builder.AddComponentReferenceCapture(1, component =>
         {
-            if (component is IContextDockPanel contextDockPanel)
-            {
-                DockScheme.GetPanelContextFunc = () => contextDockPanel.PanelContext;
-                if (DockScheme.TryRestorePanelContext(out var context))
-                    contextDockPanel.PanelContext = context;
-            }
+            DockScheme.TryRestoreComponentState(component);
+            DockScheme.GetComponentInstanceFunc = () => component;
         });
         builder.CloseComponent();
     };
@@ -128,6 +122,9 @@
 
     private async void OnDockPanelMoveBegin()
     {
+        if (DockScheme.IsHidden)
+            return;
+
         var bounds = await JSRuntime.GetElementBounds(dockPanelArea, true);
         var area = bounds.Item1;
         var areaScaleFactor = bounds.Item2;
