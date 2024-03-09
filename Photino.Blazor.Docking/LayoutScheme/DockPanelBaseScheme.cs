@@ -38,10 +38,10 @@ internal abstract class DockPanelBaseScheme : INotifyPropertyChanged
         }
         else
         {
-            foreach(var parent in ParentContainer.GetParentsChain())
+            yield return ParentContainer;
+            foreach (var parent in ParentContainer.GetParentsChain())
                 yield return parent;
         }
-        yield return ParentContainer;
     }
 
     private DockPanelContainerScheme GetTopParent(DockPanelContainerScheme lastParent) => ParentContainer?.GetTopParent(ParentContainer) ?? lastParent;

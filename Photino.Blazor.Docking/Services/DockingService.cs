@@ -30,7 +30,6 @@ public sealed class DockingService
     private DockingLayout _dockingLayout = new();
     private List<DockAreaInfo> _orderedDockPanelsAreaInfo = [];
     private List<DockPanelHostScheme> _hostPanelsByVisibleOrder = [];
-    private Dictionary<DockPanelFloatScheme, PhotinoBlazorApp> _floatPanelApps = [];
 
     internal Type FloatPanelWrapperComponent { get; private set; } = null;
     internal string MultiplePanelsTitle { get; private init; } = string.Empty;
@@ -38,7 +37,9 @@ public sealed class DockingService
     internal DockAttachInfo DockToAttach { get; private set; } = new();
     internal DockPanelFloatScheme MovingFloatPanel { get; private set; }
     internal DockZone GlobalDisabledDockZones { get; private set; }
-    internal Queue<DockPanelFloatScheme> FloatPanelsCreateQueue { get; private set; } = new();
+    internal Queue<DockPanelFloatScheme> FloatPanelsCreateQueue { get; } = [];
+    internal Dictionary<DockPanelFloatScheme, PhotinoBlazorApp> FloatPanelApps { get; } = [];
+
     internal DockPanelHostScheme HostPanel
     {
         get => _dockingLayout.HostPanel;
@@ -109,7 +110,7 @@ public sealed class DockingService
 
         // hack to avoid application crashes on docking panel detaching
         // reference to PhotinoBlazorApp instance must be stored
-        _floatPanelApps[floatPanel] = app;
+        FloatPanelApps[floatPanel] = app;
 
         app.Run();
     }
@@ -258,7 +259,7 @@ public sealed class DockingService
                 CloseDockPanel(child);
         }
 
-        _floatPanelApps.Remove(floatPanel);
+        FloatPanelApps.Remove(floatPanel);
         _hostPanelsByVisibleOrder.Remove(floatPanel);
     }
 

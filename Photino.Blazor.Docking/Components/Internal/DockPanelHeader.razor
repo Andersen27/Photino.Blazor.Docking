@@ -19,7 +19,8 @@
     <p>@(DockingService.GetPanelConfig(DockScheme.Id).Title)</p>
 
     <button @onclick="OnCloseButtonClick" @onpointerdown:stopPropagation
-            class="pb-custom-window-control-button" style="--pb-custom-window-header-height: 28px">
+            class="pb-custom-window-control-button"
+            style="--pb-custom-window-header-height: 28px; --pb-custom-window-controls-color: var(--pb-docking-controls-color)">
         <svg viewBox="0 0 22 22"><path d="m6 7l1-1 4 4 4-4 1 1-4 4 4 4-1 1-4-4-4 4-1-1 4-4z" /></svg>
     </button>
 </div>

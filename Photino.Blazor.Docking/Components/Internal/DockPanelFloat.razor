@@ -10,15 +10,18 @@
 @inherits DockPanelContainer
 
 @inject DockingService DockingService
+@inject PhotinoBlazorApp PhotinoBlazorApp
 
 <CustomWindow @ref="CustomWindow"
               Title="@HeaderTitle" ShowIcon="false" MinSize="@(DockScheme.WindowMinSize)"
               Style="--pb-custom-window-main-color: var(--pb-docking-main-color);
-                     --pb-custom-window-title-color: var(--pb-docking-title-color);
+                     --pb-custom-window-main-unfocused-color: var(--pb-docking-float-unfocused-color);
                      --pb-custom-window-background-color: var(--pb-docking-background-color);
+                     --pb-custom-window-title-color: var(--pb-docking-title-color);
                      --pb-custom-window-controls-color: var(--pb-docking-controls-color);
-                     --pb-custom-window-controls-color-hover: var(--pb-docking-controls-color-hover);
-                     --pb-custom-window-close-control-color: var(--pb-docking-float-close-control-color);"
+                     --pb-custom-window-controls-background: var(--pb-docking-controls-background);
+                     --pb-custom-window-controls-background-hover: var(--pb-docking-controls-background-hover);
+                     --pb-custom-window-close-control-color: var(--pb-docking-float-close-control-background);"
               @bind-Location="@(DockScheme.WindowLocation)" @bind-Size="@(DockScheme.WindowSize)" @bind-Maximized="@(DockScheme.WindowMaximized)">
 
     <HeaderCentralLayout>
@@ -80,7 +83,14 @@
 
     internal new DockPanelFloatScheme DockScheme
     {
-        get => (DockPanelFloatScheme)base.DockScheme;
+        get
+        {
+            // restore DockScheme when F5 key was pressed
+            if (base.DockScheme is null)
+                base.DockScheme = DockingService.FloatPanelApps.First(f => f.Value == PhotinoBlazorApp).Key;
+
+            return (DockPanelFloatScheme)(base.DockScheme);
+        }
         set => base.DockScheme = value;
     }
 

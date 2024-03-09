@@ -16,32 +16,7 @@ internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
     public bool IsHidden
     {
         get => _isHidden;
-        set
-        {
-            if (_isHidden == value)
-                return;
-
-            var isHiddenChain = GetParentsChain().Select(p => (p, p.ComputedIsHidden)).ToArray();
-            var floatPanel = GetTopParent() as DockPanelFloatScheme;
-            var floatVisiblePanelsCount = floatPanel?.GetAllDockPanelsInside().Count(p => !p.IsHidden);
-
-            _isHidden = value;
-
-            foreach(var (parent, oldIsHidden) in isHiddenChain)
-            {
-                if (parent == ParentContainer || parent.ComputedIsHidden != oldIsHidden)
-                {
-                    parent.NotifyPropertyChanged(nameof(IsHidden));
-
-                    if (floatVisiblePanelsCount.HasValue &&
-                        (floatVisiblePanelsCount.Value > 1 && value || floatVisiblePanelsCount.Value == 1 && !value))
-                    {
-                        floatPanel.NotifyPropertyChanged(nameof(IsHidden));
-                    }
-                    break;
-                }
-            }
-        }
+        set => ChangeIsHiddenState(value);
     }
 
     private bool _isDetachedGhost;
@@ -61,6 +36,16 @@ internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
 
     [JsonIgnore]
     public Func<object> GetComponentInstanceFunc { get; set; }
+
+    private void ChangeIsHiddenState(bool value)
+    {
+        if (_isHidden != value)
+        {
+            _isHidden = value;
+            foreach (var parent in GetParentsChain())
+                parent.NotifyPropertyChanged(nameof(IsHidden));
+        } 
+    }
 
     public void StoreComponentState()
     {

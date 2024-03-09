@@ -1,15 +1,17 @@
 :root {
     --pb-docking-main-color: var(--rz-primary);
     --pb-docking-main-color-dim: var(--rz-primary-darker);
+    --pb-docking-float-unfocused-color: var(--rz-primary);
     --pb-docking-layout-color: var(--rz-primary);
     --pb-docking-float-secondary-color: var(--rz-primary-light);
-    --pb-docking-title-color: var(--rz-on-primary);
     --pb-docking-background-color: var(--rz-base-background-color);
-    --pb-docking-controls-color: rgba(0,0,0,0);
-    --pb-docking-controls-color-hover: rgba(0,0,0,.25);
-    --pb-docking-float-close-control-color: var(--rz-danger-dark);
+    --pb-docking-title-color: var(--rz-on-primary);
+    --pb-docking-controls-color: var(--rz-on-primary);
+    --pb-docking-controls-background: rgba(0,0,0,0);
+    --pb-docking-controls-background-hover: rgba(0,0,0,.25);
+    --pb-docking-float-close-control-background: var(--rz-danger-dark);
     --pb-docking-compass-color: var(--rz-text-color);
-    --pb-docking-compass-shadow-color: rgba(0, 0, 0, 0.2);
+    --pb-docking-compass-shadow-color: rgba(0, 0, 0, 0.4);
     --pb-docking-compass-fill-opacity: 0.075;
 }
 
@@ -20,8 +22,8 @@
 }
 
 .pb-dock-panel-host {
-    --pb-custom-window-controls-color: var(--pb-docking-controls-color);
-    --pb-custom-window-controls-color-hover: var(--pb-docking-controls-color-hover);
+    --pb-custom-window-controls-background: var(--pb-docking-controls-background);
+    --pb-custom-window-controls-background-hover: var(--pb-docking-controls-background-hover);
 }
 
 .pb-dock-panel-float {
@@ -41,7 +43,7 @@
     background-size: 6px 6px;
     background-position: 2px 2px, 5px 5px;
     height: 16px;
-    margin: 2px;
+    margin: 4px;
 }
 
 .pb-dock-panel-split {

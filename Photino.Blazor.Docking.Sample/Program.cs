@@ -14,6 +14,10 @@ class Program
     {
         services.AddLogging();
         services.AddScoped<TestService>();
+
+        // to register singleton service use service instance, stored statically:
+        // _testService = new TestService();
+        // services.AddSingleton(_testService);
     }
 
     [STAThread]
