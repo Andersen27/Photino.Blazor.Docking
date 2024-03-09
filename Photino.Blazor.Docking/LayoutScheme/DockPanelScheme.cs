@@ -96,8 +96,10 @@ internal sealed class DockPanelScheme : DockPanelBaseScheme, ICloneable
             Id = Id,
             IsHidden = IsHidden,
             GetComponentInstanceFunc = GetComponentInstanceFunc,
+            ParentContainer = null,
         };
         newInstance.StoreComponentState();
+        newInstance.GetComponentInstanceFunc = null;
 
         return newInstance;
     }

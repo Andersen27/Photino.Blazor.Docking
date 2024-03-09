@@ -74,6 +74,7 @@
             _customWindow.WindowMoving += async (e) => { await DockingService.FloatPanelMovingAsync(e); };
             _customWindow.WindowFocusIn += () => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };
             _customWindow.WindowClosing += () => {
+                DockScheme.MarkedToDestroy = true;
                 DockingService.FloatPanelClosing(DockScheme);
                 Dispose();
                 return false;

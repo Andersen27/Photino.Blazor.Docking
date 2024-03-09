@@ -30,7 +30,7 @@
                 @PanelContent
             </div>
 
-            @if (DockingService.DockToAttach.Panel == DockScheme)
+            @if (ShowCompass)
             {
                 <DockCompass PanelIsDetachedGhost="@(DockScheme.IsDetachedGhost)"
                              DisabledZones="@UnavailableZones" />
@@ -76,6 +76,7 @@
         set => DockScheme.Id = DockingService.GetPanelConfig(value).Id;
     }
 
+    private bool ShowCompass { get; set; }
     private bool ShowHeader => !DockScheme.ParentContainer.OverrideHeaderView;
     private bool ShowGhostMask
     {
@@ -112,12 +113,24 @@
             return;
 
         DockingService.DockPanelMoveBegin += OnDockPanelMoveBegin;
-        DockingService.DockPanelToAttachChanged += () => InvokeAsync(StateHasChanged);
-        DockingService.DockZoneToAttachChanged += () =>
+        DockingService.DockPanelToAttachChanged += OnDockPanelToAttachChanged;
+        DockingService.DockZoneToAttachChanged += OnDockZoneToAttachChanged;
+    }
+
+    private void OnDockZoneToAttachChanged()
+    {
+        if (DockScheme.IsDetachedGhost)
+            InvokeAsync(StateHasChanged);
+    }
+
+    private void OnDockPanelToAttachChanged()
+    {
+        var showCompass = DockingService.DockToAttach.Panel == DockScheme;
+        if (ShowCompass != showCompass)
         {
-            if (DockScheme.IsDetachedGhost)
-                InvokeAsync(StateHasChanged);
-        };
+            ShowCompass = showCompass;
+            InvokeAsync(StateHasChanged);
+        }
     }
 
     private async void OnDockPanelMoveBegin()
@@ -146,6 +159,8 @@
     public override void Dispose()
     {
         DockingService.DockPanelMoveBegin -= OnDockPanelMoveBegin;
+        DockingService.DockPanelToAttachChanged -= OnDockPanelToAttachChanged;
+        DockingService.DockZoneToAttachChanged -= OnDockZoneToAttachChanged;
         base.Dispose();
     }
 }
