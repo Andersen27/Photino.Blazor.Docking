@@ -1,4 +1,7 @@
 # ![ ](docking.png) Photino.Blazor.Docking
+
+[![NuGet Version](https://img.shields.io/nuget/v/Photino.Blazor.Docking?logo=nuget)](https://www.nuget.org/packages/Photino.Blazor.Docking) [![NuGet Downloads](https://img.shields.io/nuget/dt/Photino.Blazor.Docking?logo=nuget)](https://www.nuget.org/packages/Photino.Blazor.Docking)
+
 ![ ](preview.gif)
 
 ## About
