@@ -15,8 +15,8 @@ class Program
         services.AddLogging();
         services.AddScoped<TestService>();
 
-        // to register singleton service use service instance, stored statically:
-        // _testService = new TestService();
+        // to register singleton service (single between OS windows) -
+        // use service instance manually created and statically stored:
         // services.AddSingleton(_testService);
     }
 

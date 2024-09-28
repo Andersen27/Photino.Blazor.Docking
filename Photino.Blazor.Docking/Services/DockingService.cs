@@ -212,12 +212,12 @@ public sealed class DockingService
         DockPanelToAttachChanged?.Invoke();
     }
 
-    internal async Task FloatPanelMovingAsync(PointerEventArgs e)
+    internal void FloatPanelMoving(PointerEventArgs e)
     {
         DockPanelScheme newPanel = default;
         DockZone newZone = default;
 
-        var pointerPos = await _screensAgentService.GetOSPointerPositionAsync(e);
+        var pointerPos = _screensAgentService.GetOSPointerPosition(e);
         foreach(var areaInfo in _orderedDockPanelsAreaInfo)
         {
             if (!areaInfo.Area.Contains(pointerPos))

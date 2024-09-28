@@ -3,13 +3,12 @@
 @using Photino.Blazor.Docking.Components.Internal
 @using Photino.Blazor.Docking.LayoutScheme
 @using Photino.Blazor.Docking.Services
-@using PhotinoNET
+@using Photino.NET
 @using System.Drawing
 
 @inherits DockPanelContainer
 
 @inject DockingService DockingService
-@inject ScreensAgentService ScreensAgentService
 @inject PhotinoBlazorApp PhotinoBlazorApp
 @inject IJSRuntime JSRuntime
 
@@ -98,7 +97,6 @@ else
         }
         if (!_inited)
         {
-            await ScreensAgentService.InitializeIfNeed(JSRuntime);
             BindHostWindowInfo();
             DockingService.PutHostPanelOnTopOfVisibleList(DockScheme);
             HostWindow.WindowFocusIn += (_, _) => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };

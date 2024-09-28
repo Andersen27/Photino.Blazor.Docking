@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Photino.Blazor.CustomWindow.Extensions;
 using Photino.Blazor.CustomWindow.Services;
 using Photino.Blazor.Docking.Services;
 using System.Drawing;
@@ -12,7 +13,7 @@ public static class ServiceCollectionExtensions
     /// Configure and add <see cref="DockingService"/> as singleton to <see cref="IServiceCollection"/>.
     /// </summary>
     /// <param name="servicesInitializer">
-    /// Initialization function for services, called for <see cref="Photino.Blazor.PhotinoBlazorAppBuilder"/> instances of floating panels.
+    /// Initialization function for services, called for <see cref="PhotinoBlazorAppBuilder"/> instances of floating panels.
     /// Function should add to the collection all services required by Blazor components inside floating panels, excluding <see cref="DockingService"/>.
     /// </param>
     /// <param name="panelsConfig">
@@ -45,20 +46,22 @@ public static class ServiceCollectionExtensions
                                                              Size? panelsMinSize = null,
                                                              Size? defaultFloatPanelSize = null)
     {
-        var screensAgentService = new ScreensAgentService();
-        var dockingService = new DockingService (
-            screensAgentService,
-            servicesInitializer,
-            panelsConfig,
-            floatPanelWrapperComponent,
-            multiplePanelsTitle,
-            restoreHostWindowOnOpen,
-            panelsMinSize,
-            defaultFloatPanelSize
-        );
-
-        services.AddSingleton(screensAgentService);
-        services.AddSingleton(dockingService);
+        services.AddCustomWindow();
+        
+        services.AddSingleton(sp =>
+        {
+            var screensAgentService = sp.GetRequiredService<ScreensAgentService>();
+            return new DockingService(
+                screensAgentService,
+                servicesInitializer,
+                panelsConfig,
+                floatPanelWrapperComponent,
+                multiplePanelsTitle,
+                restoreHostWindowOnOpen,
+                panelsMinSize,
+                defaultFloatPanelSize
+            );
+        });
         return services;
     }
 }

@@ -1,7 +1,7 @@
 ﻿@using Photino.Blazor.CustomWindow.Components
 @using Photino.Blazor.Docking.LayoutScheme
 @using Photino.Blazor.Docking.Services
-@using PhotinoNET
+@using Photino.NET
 @using Microsoft.AspNetCore.Components.Web
 @using Radzen
 @using System.Drawing
@@ -71,7 +71,7 @@
             _customWindow = value;
             _customWindow.WindowMoveBegin += () => { DockingService.FloatPanelMoveBegin(DockScheme); };
             _customWindow.WindowMoveEnd += () => { DockingService.FloatPanelMoveEnd(); };
-            _customWindow.WindowMoving += async (e) => { await DockingService.FloatPanelMovingAsync(e); };
+            _customWindow.WindowMoving += (e) => { DockingService.FloatPanelMoving(e); };
             _customWindow.WindowFocusIn += () => { DockingService.PutHostPanelOnTopOfVisibleList(DockScheme); };
             _customWindow.WindowClosing += () => {
                 DockScheme.MarkedToDestroy = true;

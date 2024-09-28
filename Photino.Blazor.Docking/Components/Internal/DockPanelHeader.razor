@@ -14,7 +14,7 @@
 
 <div @ref="headerArea" class="pb-dock-panel-header @(IsDim ? "pb-dock-panel-header-dim" : "")"
      style="@(DockScheme.IsDetachedGhost ? "opacity: 0.6" : "")"
-     @onpointerdown="OnPointerDown" @onpointerup="OnPointerUp" @onpointermove="OnPointerMoveAsync">
+     @onpointerdown="OnPointerDown" @onpointerup="OnPointerUp" @onpointermove="OnPointerMove">
 
     <p>@(DockingService.GetPanelConfig(DockScheme.Id).Title)</p>
 
@@ -57,8 +57,8 @@
             if (DockScheme.ParentContainer is DockPanelTabsScheme tabsContainer)
                 tabsContainer.CurrentTab = DockScheme;
 
-            var scale = await ScreensAgentService.GetPointerPositionScaleFactorAsync(e);
-            _moveBeginPosition = await ScreensAgentService.GetOSPointerPositionAsync(e);
+            var scale = ScreensAgentService.GetPointerScreenScale(e);
+            _moveBeginPosition = ScreensAgentService.GetOSPointerPosition(e);
             _moveBeginOffset = new Point((int)(e.OffsetX * scale), (int)(e.OffsetY * scale));
             await JSRuntime.InvokeElementMethodAsync(headerArea, "setPointerCapture", 1);
         }
@@ -94,16 +94,16 @@
         }
     }
 
-    private async Task OnPointerMoveAsync(PointerEventArgs e)
+    private void OnPointerMove(PointerEventArgs e)
     {
         if (!CanBeDetached || _moveBeginPosition is null)
             return;
 
-        var pointerPos = await ScreensAgentService.GetOSPointerPositionAsync(e);
+        var pointerPos = ScreensAgentService.GetOSPointerPosition(e);
         if (_movingProcess)
         {
             _detachedFloatPanel.WindowLocation = new Point(pointerPos.X - _moveBeginOffset.X, pointerPos.Y - _moveBeginOffset.Y);
-            await DockingService.FloatPanelMovingAsync(e);
+            DockingService.FloatPanelMoving(e);
         }
         else
         {
